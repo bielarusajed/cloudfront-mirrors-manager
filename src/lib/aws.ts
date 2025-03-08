@@ -20,14 +20,24 @@ import {
   ListOriginRequestPoliciesCommand,
   UpdateDistributionCommand,
 } from '@aws-sdk/client-cloudfront';
-import { AWS_DEFAULT_REGION } from './constants';
+import { getAwsCredentials } from './auth';
 
-// Ініцыялізуем CloudFront кліент
-// Калі AWS_ACCESS_KEY_ID і AWS_SECRET_ACCESS_KEY усталяваны як пераменныя асяроддзя,
-// SDK будзе выкарыстоўваць іх аўтаматычна
-export const cloudfront = new CloudFrontClient({
-  region: process.env.AWS_REGION || AWS_DEFAULT_REGION,
-});
+// Ініцыялізуем CloudFront кліент з крэдэнцыяламі з cookie
+export async function getCloudFrontClient() {
+  const credentials = await getAwsCredentials();
+
+  if (!credentials) {
+    throw new Error('AWS credentials not found');
+  }
+
+  return new CloudFrontClient({
+    credentials: {
+      accessKeyId: credentials.accessKeyId,
+      secretAccessKey: credentials.secretAccessKey,
+    },
+    region: credentials.region,
+  });
+}
 
 export async function createDistribution({
   originDomainName,
@@ -35,6 +45,7 @@ export async function createDistribution({
   originRequestPolicyId,
 }: CreateDistributionRequest): Promise<CreateDistributionResponse> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new CreateDistributionCommand({
       DistributionConfig: {
         CallerReference: Date.now().toString(),
@@ -92,6 +103,7 @@ export async function createDistribution({
 
 export async function listDistributions(): Promise<AWSDistributionResponse> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new ListDistributionsCommand({});
     const response = await cloudfront.send(command);
     return {
@@ -110,6 +122,7 @@ export async function getDistributionETag(
   id: string,
 ): Promise<string | undefined> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new GetDistributionCommand({ Id: id });
     const response = await cloudfront.send(command);
     return response.ETag;
@@ -123,6 +136,7 @@ export async function disableDistribution(
   id: string,
 ): Promise<UpdateDistributionResponse> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const getCommand = new GetDistributionCommand({ Id: id });
     const distribution = await cloudfront.send(getCommand);
 
@@ -179,6 +193,7 @@ export async function deleteDistribution(
       };
     }
 
+    const cloudfront = await getCloudFrontClient();
     const command = new DeleteDistributionCommand({
       Id: id,
       IfMatch: etag,
@@ -197,6 +212,7 @@ export async function enableDistribution(
   id: string,
 ): Promise<UpdateDistributionResponse> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const getCommand = new GetDistributionCommand({ Id: id });
     const distribution = await cloudfront.send(getCommand);
 
@@ -234,6 +250,7 @@ export async function enableDistribution(
 
 export async function listCachePolicies(): Promise<CachePolicyResponse> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new ListCachePoliciesCommand({});
     const response = await cloudfront.send(command);
     return {
@@ -250,6 +267,7 @@ export async function listCachePolicies(): Promise<CachePolicyResponse> {
 
 export async function listOriginRequestPolicies(): Promise<OriginRequestPolicyResponse> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new ListOriginRequestPoliciesCommand({});
     const response = await cloudfront.send(command);
     return {
@@ -268,6 +286,7 @@ export async function getDistributionStatus(
   id: string,
 ): Promise<DistributionStatus | undefined> {
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new GetDistributionCommand({ Id: id });
     const response = await cloudfront.send(command);
     return response.Distribution?.Status as DistributionStatus;
