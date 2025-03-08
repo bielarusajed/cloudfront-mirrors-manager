@@ -79,11 +79,12 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex flex-col 2xl:flex-row gap-2 w-full 2xl:w-auto">
       {distribution.enabled ? (
         <Button
           variant="destructive"
           size="sm"
+          className="w-full 2xl:w-auto"
           onClick={handleToggleStatus}
           disabled={isToggling || isDisabling}
         >
@@ -104,6 +105,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
           <Button
             variant="default"
             size="sm"
+            className="w-full 2xl:w-auto"
             onClick={handleToggleStatus}
             disabled={isToggling || isEnabling}
           >
@@ -124,6 +126,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
               <Button
                 variant="destructive"
                 size="sm"
+                className="w-full 2xl:w-auto"
                 disabled={isDeleting || isDisabling || isEnabling}
               >
                 <Trash2 className="h-4 w-4 mr-2" />

@@ -36,11 +36,15 @@ export default async function Home() {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <main className="container mx-auto flex min-h-screen flex-col gap-8 p-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <h1 className="text-2xl font-bold">CloudFront Manager</h1>
-          <div className="flex gap-4">
+          <div className="flex flex-col md:flex-row gap-4">
             <CreateDistributionDialog />
-            <Button onClick={signOut} variant="outline">
+            <Button
+              onClick={signOut}
+              variant="outline"
+              className="w-full md:w-auto"
+            >
               <LogOut className="h-4 w-4 mr-2" />
               Выйсці
             </Button>

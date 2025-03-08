@@ -50,7 +50,7 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
 
   return (
     <Card className="gap-1">
-      <CardHeader className="flex flex-row justify-between items-start">
+      <CardHeader className="flex flex-col 2xl:flex-row justify-between items-start gap-4">
         <div className="space-y-1">
           <CardTitle className="text-sm text-muted-foreground">
             ID: {distribution.id}
