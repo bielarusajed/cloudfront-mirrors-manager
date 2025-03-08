@@ -1,5 +1,5 @@
 import { checkApiAuth } from '@/lib/api-auth';
-import { cloudfront } from '@/lib/aws';
+import { getCloudFrontClient } from '@/lib/aws';
 import {
   CreateDistributionCommand,
   DeleteDistributionCommand,
@@ -15,6 +15,7 @@ export async function GET() {
   if (authError) return authError;
 
   try {
+    const cloudfront = await getCloudFrontClient();
     const command = new ListDistributionsCommand({});
     const response = await cloudfront.send(command);
 
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const cloudfront = await getCloudFrontClient();
     const command = new CreateDistributionCommand({
       DistributionConfig: {
         CallerReference: Date.now().toString(),
@@ -114,6 +116,8 @@ export async function DELETE(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    const cloudfront = await getCloudFrontClient();
 
     // Спачатку атрымліваем distribution, каб праверыць яго стан і ETag
     const getCommand = new GetDistributionCommand({ Id: id });

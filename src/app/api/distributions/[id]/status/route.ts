@@ -1,10 +1,10 @@
 import { checkApiAuth } from '@/lib/api-auth';
 import { getDistributionStatus } from '@/lib/aws';
-import { NextResponse } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } },
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const authError = await checkApiAuth();
   if (authError) return authError;
