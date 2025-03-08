@@ -43,6 +43,7 @@ export async function createDistribution({
   originDomainName,
   cachePolicyId,
   originRequestPolicyId,
+  comments,
 }: CreateDistributionRequest): Promise<CreateDistributionResponse> {
   try {
     const cloudfront = await getCloudFrontClient();
@@ -50,7 +51,7 @@ export async function createDistribution({
       DistributionConfig: {
         CallerReference: Date.now().toString(),
         Enabled: true,
-        Comment: '',
+        Comment: comments || '',
         Origins: {
           Quantity: 1,
           Items: [
@@ -293,5 +294,45 @@ export async function getDistributionStatus(
   } catch (error) {
     console.error('Error getting distribution status:', error);
     return undefined;
+  }
+}
+
+export async function updateDistributionComments(
+  id: string,
+  comments: string,
+): Promise<UpdateDistributionResponse> {
+  try {
+    const cloudfront = await getCloudFrontClient();
+    const getCommand = new GetDistributionCommand({ Id: id });
+    const distribution = await cloudfront.send(getCommand);
+
+    if (!distribution.Distribution || !distribution.ETag) {
+      return {
+        error: 'Не атрымалася атрымаць інфармацыю аб distribution',
+      };
+    }
+
+    const config = distribution.Distribution.DistributionConfig;
+    if (!config) {
+      return {
+        error: 'Не атрымалася атрымаць канфігурацыю distribution',
+      };
+    }
+
+    config.Comment = comments;
+
+    const updateCommand = new UpdateDistributionCommand({
+      Id: id,
+      DistributionConfig: config,
+      IfMatch: distribution.ETag,
+    });
+
+    await cloudfront.send(updateCommand);
+    return {};
+  } catch (error) {
+    console.error('Error updating distribution comments:', error);
+    return {
+      error: 'Не атрымалася абнавіць тэгі distribution',
+    };
   }
 }

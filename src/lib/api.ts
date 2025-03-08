@@ -81,3 +81,20 @@ export async function disableDistribution(
   );
   return response.json();
 }
+
+export async function updateComments(
+  id: string,
+  comments: string,
+): Promise<UpdateDistributionResponse> {
+  const response = await fetch(
+    `${getBaseUrl()}/api/distributions/${id}/comments`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ comments }),
+    },
+  );
+  return response.json();
+}

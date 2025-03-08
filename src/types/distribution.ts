@@ -16,6 +16,7 @@ export type DistributionSummary = {
   domainName: string;
   lastModifiedTime?: Date;
   origins: DistributionOrigin[];
+  comments?: string;
 };
 
 export type DistributionDetails = DistributionSummary;
@@ -24,6 +25,7 @@ export type CreateDistributionRequest = {
   originDomainName: string;
   cachePolicyId: string;
   originRequestPolicyId: string;
+  comments?: string;
 };
 
 export type CreateDistributionResponse = {

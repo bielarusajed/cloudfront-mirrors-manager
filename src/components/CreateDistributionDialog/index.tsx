@@ -72,6 +72,7 @@ export function CreateDistributionDialog() {
       originDomainName: '',
       cachePolicyId: '',
       originRequestPolicyId: '',
+      comments: '',
     },
   });
 
@@ -229,6 +230,22 @@ export function CreateDistributionDialog() {
                   </Select>
                   <FormDescription>
                     Выберыце палітыку запытаў да крыніцы
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="comments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Тэгі</FormLabel>
+                  <FormControl>
+                    <Input placeholder="tag1;tag2;tag3" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    Спіс тэгаў, падзеленых кропкай з коскай (;)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

@@ -37,6 +37,7 @@ export async function getDistributions(): Promise<DistributionsListResponse> {
         item.Origins?.Items?.map((origin) => ({
           domainName: origin.DomainName || '',
         })) || [],
+      comments: item.Comment || undefined,
     })),
     error: response.error,
   };

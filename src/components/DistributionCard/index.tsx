@@ -51,16 +51,20 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
   return (
     <Card className="gap-1">
       <CardHeader className="flex flex-col 2xl:flex-row justify-between items-start gap-4">
-        <div className="space-y-1">
-          <CardTitle className="text-sm text-muted-foreground">
-            ID: {distribution.id}
-          </CardTitle>
+        <div className="space-y-1 w-full">
+          <div className="flex items-start justify-between">
+            <div className="space-y-0.5">
+              <CardTitle className="text-sm text-muted-foreground">
+                ID: {distribution.id}
+              </CardTitle>
+              <DomainInfo distribution={distribution} />
+            </div>
+            <ActionButtons distribution={distribution} />
+          </div>
           <StatusBadge distribution={distribution} />
         </div>
-        <ActionButtons distribution={distribution} />
       </CardHeader>
       <CardContent className="space-y-1">
-        <DomainInfo distribution={distribution} />
         <DistributionInfoComponent distribution={distribution} />
       </CardContent>
     </Card>

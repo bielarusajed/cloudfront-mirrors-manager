@@ -16,17 +16,22 @@ export function DomainInfo({ distribution }: DomainInfoProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center">
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-mono text-sm hover:underline"
+        className="font-mono text-sm hover:underline text-muted-foreground truncate"
       >
         {distribution.domainName}
       </a>
-      <Button variant="ghost" size="icon" onClick={handleCopy}>
-        <Copy className="h-4 w-4" />
+      <Button
+        variant="ghost"
+        size="icon"
+        className="h-4 w-4 p-0 ml-1 shrink-0"
+        onClick={handleCopy}
+      >
+        <Copy className="h-3 w-3" />
       </Button>
     </div>
   );
