@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+Preffer using shadcn/ui components over writing own components.
+
+If there is no needed component installed, feel free to install it.
+
+Use the new 'shadcn@canary' CLI.
+
+Use lucide-react icons.
