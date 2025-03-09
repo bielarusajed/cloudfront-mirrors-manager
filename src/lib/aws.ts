@@ -1,7 +1,6 @@
 import type { AWSDistributionResponse, CachePolicyResponse, OriginRequestPolicyResponse } from '@/types/aws';
 import type {
   CreateDistributionRequest,
-  CreateDistributionResponse,
   DeleteDistributionResponse,
   DistributionStatus,
   UpdateDistributionResponse,
@@ -21,10 +20,7 @@ import { getAwsCredentials } from './auth';
 // Ініцыялізуем CloudFront кліент з крэдэнцыяламі з cookie
 export async function getCloudFrontClient() {
   const credentials = await getAwsCredentials();
-
-  if (!credentials) {
-    throw new Error('AWS credentials not found');
-  }
+  if (!credentials) throw new Error('AWS credentials not found');
 
   return new CloudFrontClient({
     credentials: {
@@ -87,9 +83,7 @@ export async function createDistribution({
 
   const response = await cloudfront.send(command);
 
-  if (!response.Distribution?.Id) {
-    throw new Error('Не атрымалася стварыць distribution: ID не знойдзены');
-  }
+  if (!response.Distribution?.Id) throw new Error('Не атрымалася стварыць distribution: ID не знойдзены');
 
   return {
     id: response.Distribution.Id,
@@ -125,114 +119,65 @@ export async function getDistributionETag(id: string): Promise<string | undefine
   }
 }
 
-export async function disableDistribution(id: string): Promise<UpdateDistributionResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const getCommand = new GetDistributionCommand({ Id: id });
-    const distribution = await cloudfront.send(getCommand);
+export async function disableDistribution(id: string): Promise<void> {
+  const cloudfront = await getCloudFrontClient();
+  const getCommand = new GetDistributionCommand({ Id: id });
+  const distribution = await cloudfront.send(getCommand);
 
-    if (!distribution.Distribution || !distribution.ETag) {
-      return {
-        error: 'Не атрымалася атрымаць інфармацыю аб distribution',
-      };
-    }
+  if (!distribution.Distribution || !distribution.ETag)
+    throw new Error('Не атрымалася атрымаць інфармацыю аб distribution');
 
-    const config = distribution.Distribution.DistributionConfig;
-    if (!config) {
-      return {
-        error: 'Не атрымалася атрымаць канфігурацыю distribution',
-      };
-    }
+  const config = distribution.Distribution.DistributionConfig;
+  if (!config) throw new Error('Не атрымалася атрымаць канфігурацыю distribution');
 
-    // Выключаем distribution
-    config.Enabled = false;
+  config.Enabled = false;
 
-    const updateCommand = new UpdateDistributionCommand({
-      Id: id,
-      DistributionConfig: config,
-      IfMatch: distribution.ETag,
-    });
+  const updateCommand = new UpdateDistributionCommand({
+    Id: id,
+    DistributionConfig: config,
+    IfMatch: distribution.ETag,
+  });
 
-    await cloudfront.send(updateCommand);
-    return {};
-  } catch (error) {
-    console.error('Error disabling distribution:', error);
-    return {
-      error: 'Не атрымалася выключыць distribution',
-    };
-  }
+  await cloudfront.send(updateCommand);
 }
 
-export async function deleteDistribution(id: string): Promise<DeleteDistributionResponse> {
-  try {
-    // Спачатку выключаем distribution
-    const disableResult = await disableDistribution(id);
-    if (disableResult.error) {
-      return disableResult;
-    }
+export async function deleteDistribution(id: string): Promise<void> {
+  await disableDistribution(id);
 
-    // Чакаем, пакуль distribution будзе выключаны
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+  // Чакаем, пакуль distribution будзе выключаны
+  await new Promise((resolve) => setTimeout(resolve, 5000));
 
-    // Атрымліваем актуальны ETag
-    const etag = await getDistributionETag(id);
-    if (!etag) {
-      return {
-        error: 'Не атрымалася атрымаць версію distribution',
-      };
-    }
+  const etag = await getDistributionETag(id);
+  if (!etag) throw new Error('Не атрымалася атрымаць версію distribution');
 
-    const cloudfront = await getCloudFrontClient();
-    const command = new DeleteDistributionCommand({
-      Id: id,
-      IfMatch: etag,
-    });
-    await cloudfront.send(command);
-    return {};
-  } catch (error) {
-    console.error('Error deleting distribution:', error);
-    return {
-      error: 'Не атрымалася выдаліць distribution',
-    };
-  }
+  const cloudfront = await getCloudFrontClient();
+  const command = new DeleteDistributionCommand({
+    Id: id,
+    IfMatch: etag,
+  });
+  await cloudfront.send(command);
 }
 
-export async function enableDistribution(id: string): Promise<UpdateDistributionResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const getCommand = new GetDistributionCommand({ Id: id });
-    const distribution = await cloudfront.send(getCommand);
+export async function enableDistribution(id: string): Promise<void> {
+  const cloudfront = await getCloudFrontClient();
+  const getCommand = new GetDistributionCommand({ Id: id });
+  const distribution = await cloudfront.send(getCommand);
 
-    if (!distribution.Distribution || !distribution.ETag) {
-      return {
-        error: 'Не атрымалася атрымаць інфармацыю аб distribution',
-      };
-    }
+  if (!distribution.Distribution || !distribution.ETag)
+    throw new Error('Не атрымалася атрымаць інфармацыю аб distribution');
 
-    const config = distribution.Distribution.DistributionConfig;
-    if (!config) {
-      return {
-        error: 'Не атрымалася атрымаць канфігурацыю distribution',
-      };
-    }
+  const config = distribution.Distribution.DistributionConfig;
+  if (!config) throw new Error('Не атрымалася атрымаць канфігурацыю distribution');
 
-    // Уключаем distribution
-    config.Enabled = true;
+  config.Enabled = true;
 
-    const updateCommand = new UpdateDistributionCommand({
-      Id: id,
-      DistributionConfig: config,
-      IfMatch: distribution.ETag,
-    });
+  const updateCommand = new UpdateDistributionCommand({
+    Id: id,
+    DistributionConfig: config,
+    IfMatch: distribution.ETag,
+  });
 
-    await cloudfront.send(updateCommand);
-    return {};
-  } catch (error) {
-    console.error('Error enabling distribution:', error);
-    return {
-      error: 'Не атрымалася ўключыць distribution',
-    };
-  }
+  await cloudfront.send(updateCommand);
 }
 
 export async function listCachePolicies(): Promise<CachePolicyResponse> {

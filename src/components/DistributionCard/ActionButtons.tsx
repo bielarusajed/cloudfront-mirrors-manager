@@ -17,9 +17,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import type { DistributionSummary } from '@/types/distribution';
+import { useMutation } from '@tanstack/react-query';
 import { Loader2, Power, PowerOff, Trash2 } from 'lucide-react';
-import { useTransition } from 'react';
-import type { MouseEvent } from 'react';
 import { toast } from 'sonner';
 
 type ActionButtonsProps = {
@@ -27,51 +26,33 @@ type ActionButtonsProps = {
 };
 
 export function ActionButtons({ distribution }: ActionButtonsProps) {
-  const [isDeleting, startDeleting] = useTransition();
-  const [isToggling, startToggling] = useTransition();
+  const { mutate: deleteDistribution, isPending: isDeleting } = useMutation({
+    mutationFn: async () => {
+      if (!distribution.id) throw new Error('Немагчыма выдаліць distribution без ID');
+      await deleteDistributionAction(distribution.id);
+    },
+    onError: (error) =>
+      toast.error('Не атрымалася выдаліць distribution', {
+        description: error instanceof Error ? error.message : undefined,
+      }),
+  });
+
+  const { mutate: toggleStatus, isPending: isToggling } = useMutation({
+    mutationFn: async () => {
+      if (!distribution.id) throw new Error('Немагчыма зменіць статус distribution без ID');
+      const action = distribution.enabled ? disableDistributionAction : enableDistributionAction;
+      await action(distribution.id);
+    },
+    onError: (error) =>
+      toast.error('Не атрымалася зменіць статус distribution', {
+        description: error instanceof Error ? error.message : undefined,
+      }),
+  });
 
   const isDisabling = distribution.status === 'InProgress' && !distribution.enabled;
   const isEnabling = distribution.status === 'InProgress' && distribution.enabled;
 
-  const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    startDeleting(async () => {
-      try {
-        if (!distribution.id) {
-          toast.error('Немагчыма выдаліць distribution без ID');
-          return;
-        }
-        const result = await deleteDistributionAction(distribution.id);
-        if (result.error) {
-          toast.error(result.error, { description: `ID: ${distribution.id}` });
-          return;
-        }
-        await revalidateDistributionsAction();
-      } catch (error) {
-        toast.error('Не атрымалася выдаліць distribution', {
-          description: `ID: ${distribution.id}`,
-        });
-      }
-    });
-  };
-
-  const handleToggleStatus = () => {
-    startToggling(async () => {
-      try {
-        if (!distribution.id) {
-          toast.error('Немагчыма зменіць статус distribution без ID');
-          return;
-        }
-        const action = distribution.enabled ? disableDistributionAction : enableDistributionAction;
-        const result = await action(distribution.id);
-        if (result.error) toast.error(result.error, { description: `ID: ${distribution.id}` });
-      } catch (error) {
-        toast.error('Не атрымалася зменіць статус distribution', {
-          description: `ID: ${distribution.id}`,
-        });
-      }
-    });
-  };
+  const handleToggleStatus = () => toggleStatus();
 
   return (
     <div className="flex w-full flex-col gap-2 2xl:w-auto 2xl:flex-row">
@@ -138,7 +119,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Адмена</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                <AlertDialogAction onClick={() => deleteDistribution()} disabled={isDeleting}>
                   {isDeleting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
