@@ -8,25 +8,20 @@ type DistributionInfoProps = {
 
 export function DistributionInfo({ distribution }: DistributionInfoProps) {
   const lastModifiedTime = distribution.lastModifiedTime || new Date();
-  const timeAgo = formatDistanceToNow(lastModifiedTime, {
-    addSuffix: true,
-    locale: be,
-  });
+  const timeAgo = formatDistanceToNow(lastModifiedTime, { addSuffix: true, locale: be });
 
   return (
     <div className="text-sm">
       {distribution.origins.length > 0 && (
-        <div>
+        <p>
           <span className="text-muted-foreground">Крыніцы: </span>
-          <span className="font-mono truncate">
-            {distribution.origins.map((o) => o.domainName).join(', ')}
-          </span>
-        </div>
+          <span className="truncate font-mono">{distribution.origins.map((o) => o.domainName).join(', ')}</span>
+        </p>
       )}
-      <div className="">
+      <p>
         <span className="text-muted-foreground">Апошняе абнаўленне: </span>
         <span className="truncate">{timeAgo}</span>
-      </div>
+      </p>
     </div>
   );
 }
