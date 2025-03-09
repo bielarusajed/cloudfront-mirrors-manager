@@ -39,9 +39,7 @@ export function CreateDistributionDialog() {
     queryKey: ['policies'],
     queryFn: async () => {
       const response = await fetchPolicies();
-      if (response.error) {
-        toast.error(response.error);
-      }
+      if (response.error) toast.error(response.error);
       return {
         cachePolicies: response.cachePolicies,
         originRequestPolicies: response.originRequestPolicies,
@@ -55,7 +53,6 @@ export function CreateDistributionDialog() {
       originDomainName: '',
       cachePolicyId: '',
       originRequestPolicyId: '',
-      comments: '',
     },
   });
 
@@ -180,20 +177,6 @@ export function CreateDistributionDialog() {
                     </SelectContent>
                   </Select>
                   <FormDescription>Выберыце палітыку запытаў да крыніцы</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="comments"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Тэгі</FormLabel>
-                  <FormControl>
-                    <Input placeholder="tag1;tag2;tag3" {...field} />
-                  </FormControl>
-                  <FormDescription>Спіс тэгаў, падзеленых кропкай з коскай (;)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
