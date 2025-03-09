@@ -24,8 +24,7 @@ export type CreateDistributionRequest = {
 };
 
 export type CreateDistributionResponse = {
-  id?: string;
-  error?: string;
+  id: string;
 };
 
 export type UpdateDistributionResponse = {

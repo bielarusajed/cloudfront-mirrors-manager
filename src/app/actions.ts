@@ -23,28 +23,28 @@ interface CreateDistributionParams {
 export async function createDistributionAction(params: CreateDistributionParams) {
   await checkActionAuth();
   const result = await createDistribution(params);
-  await revalidatePath('/');
+  revalidatePath('/');
   return result;
 }
 
 export async function deleteDistributionAction(id: string) {
   await checkActionAuth();
   const result = await deleteDistribution(id);
-  await revalidatePath('/');
+  revalidatePath('/');
   return result;
 }
 
 export async function disableDistributionAction(id: string) {
   await checkActionAuth();
   const result = await disableDistribution(id);
-  await revalidatePath('/');
+  revalidatePath('/');
   return result;
 }
 
 export async function enableDistributionAction(id: string) {
   await checkActionAuth();
   const result = await enableDistribution(id);
-  await revalidatePath('/');
+  revalidatePath('/');
   return result;
 }
 
@@ -59,6 +59,6 @@ export async function updateDistributionCommentsAction(
 ): Promise<UpdateDistributionResponse> {
   await checkActionAuth();
   const result = await updateDistributionComments(id, newTags);
-  await revalidatePath('/');
+  revalidatePath('/');
   return result;
 }

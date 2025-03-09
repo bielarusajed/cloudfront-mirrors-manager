@@ -19,9 +19,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { fetchPolicies } from '@/lib/api';
 import type { CachePolicySummary, OriginRequestPolicySummary } from '@aws-sdk/client-cloudfront';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Loader2, Plus } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { type FormValues, formSchema } from './schema';
@@ -32,7 +32,6 @@ type Policies = {
 };
 
 export function CreateDistributionDialog() {
-  const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
   const { data } = useQuery<Policies>({
@@ -47,6 +46,9 @@ export function CreateDistributionDialog() {
     },
   });
 
+  const cachePolicies = data?.cachePolicies ?? [];
+  const originRequestPolicies = data?.originRequestPolicies ?? [];
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,31 +58,18 @@ export function CreateDistributionDialog() {
     },
   });
 
-  const onSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    const values = form.getValues();
-    if (!form.formState.isValid) {
-      form.trigger();
-      return;
-    }
-    startTransition(async () => {
-      try {
-        const result = await createDistributionAction(values);
-        if (result.error) {
-          toast.error(result.error);
-        } else if (result.id) {
-          toast.success('Distribution створаны');
-          form.reset();
-          setOpen(false);
-        }
-      } catch (error) {
-        toast.error('Не атрымалася стварыць distribution');
-      }
-    });
-  };
-
-  const cachePolicies = data?.cachePolicies ?? [];
-  const originRequestPolicies = data?.originRequestPolicies ?? [];
+  const { mutate, isPending } = useMutation({
+    mutationFn: createDistributionAction,
+    onSuccess: (result) => {
+      toast.success('Distribution створаны', { description: `ID: ${result.id}` });
+      form.reset();
+      setOpen(false);
+    },
+    onError: (error) =>
+      toast.error('Не атрымалася стварыць distribution', {
+        description: error instanceof Error ? error.message : undefined,
+      }),
+  });
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -183,7 +172,10 @@ export function CreateDistributionDialog() {
             />
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isPending}>Адмена</AlertDialogCancel>
-              <AlertDialogAction onClick={onSubmit} disabled={isPending}>
+              <AlertDialogAction
+                onClick={form.handleSubmit((values: FormValues) => mutate(values))}
+                disabled={isPending}
+              >
                 {isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

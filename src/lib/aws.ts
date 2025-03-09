@@ -40,62 +40,60 @@ export async function createDistribution({
   cachePolicyId,
   originRequestPolicyId,
   comments,
-}: CreateDistributionRequest): Promise<CreateDistributionResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const command = new CreateDistributionCommand({
-      DistributionConfig: {
-        CallerReference: Date.now().toString(),
-        Enabled: true,
-        Comment: comments || '',
-        Origins: {
-          Quantity: 1,
-          Items: [
-            {
-              Id: 'CustomOrigin',
-              DomainName: originDomainName,
-              CustomOriginConfig: {
-                HTTPPort: 80,
-                HTTPSPort: 443,
-                OriginProtocolPolicy: 'match-viewer',
-                OriginSslProtocols: {
-                  Quantity: 1,
-                  Items: ['TLSv1.2'],
-                },
+}: CreateDistributionRequest): Promise<{ id: string }> {
+  const cloudfront = await getCloudFrontClient();
+  const command = new CreateDistributionCommand({
+    DistributionConfig: {
+      CallerReference: Date.now().toString(),
+      Enabled: true,
+      Comment: comments || '',
+      Origins: {
+        Quantity: 1,
+        Items: [
+          {
+            Id: 'CustomOrigin',
+            DomainName: originDomainName,
+            CustomOriginConfig: {
+              HTTPPort: 80,
+              HTTPSPort: 443,
+              OriginProtocolPolicy: 'match-viewer',
+              OriginSslProtocols: {
+                Quantity: 1,
+                Items: ['TLSv1.2'],
               },
             },
-          ],
-        },
-        DefaultCacheBehavior: {
-          TargetOriginId: 'CustomOrigin',
-          ViewerProtocolPolicy: 'redirect-to-https',
-          CachePolicyId: cachePolicyId,
-          OriginRequestPolicyId: originRequestPolicyId,
-          AllowedMethods: {
+          },
+        ],
+      },
+      DefaultCacheBehavior: {
+        TargetOriginId: 'CustomOrigin',
+        ViewerProtocolPolicy: 'redirect-to-https',
+        CachePolicyId: cachePolicyId,
+        OriginRequestPolicyId: originRequestPolicyId,
+        AllowedMethods: {
+          Quantity: 2,
+          Items: ['HEAD', 'GET'],
+          CachedMethods: {
             Quantity: 2,
             Items: ['HEAD', 'GET'],
-            CachedMethods: {
-              Quantity: 2,
-              Items: ['HEAD', 'GET'],
-            },
           },
-          Compress: true,
         },
-        PriceClass: 'PriceClass_100',
-        HttpVersion: 'http2and3',
+        Compress: true,
       },
-    });
+      PriceClass: 'PriceClass_100',
+      HttpVersion: 'http2and3',
+    },
+  });
 
-    const response = await cloudfront.send(command);
-    return {
-      id: response.Distribution?.Id,
-    };
-  } catch (error) {
-    console.error('Error creating distribution:', error);
-    return {
-      error: 'Не атрымалася стварыць distribution',
-    };
+  const response = await cloudfront.send(command);
+
+  if (!response.Distribution?.Id) {
+    throw new Error('Не атрымалася стварыць distribution: ID не знойдзены');
   }
+
+  return {
+    id: response.Distribution.Id,
+  };
 }
 
 export async function listDistributions(): Promise<AWSDistributionResponse> {
