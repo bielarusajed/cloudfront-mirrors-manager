@@ -19,7 +19,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { fetchPolicies } from '@/lib/api';
 import type { CachePolicySummary, OriginRequestPolicySummary } from '@aws-sdk/client-cloudfront';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -33,6 +33,8 @@ type Policies = {
 
 export function CreateDistributionDialog() {
   const [open, setOpen] = useState(false);
+
+  const queryClient = useQueryClient();
 
   const { data, error } = useQuery<Policies>({
     queryKey: ['policies'],
@@ -61,7 +63,8 @@ export function CreateDistributionDialog() {
 
   const { mutate, isPending } = useMutation({
     mutationFn: createDistributionAction,
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
+      await queryClient.invalidateQueries({ queryKey: ['distributions'] });
       toast.success('Distribution створаны', { description: `ID: ${result.id}` });
       form.reset();
       setOpen(false);

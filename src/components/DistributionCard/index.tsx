@@ -1,10 +1,9 @@
 'use client';
 
-import { revalidateDistributionsAction } from '@/app/actions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { fetchDistributionStatus } from '@/lib/api';
 import type { DistributionStatus, DistributionSummary } from '@/types/distribution';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { toast } from 'sonner';
 import { ActionButtons } from './ActionButtons';
@@ -18,6 +17,13 @@ type DistributionCardProps = {
 
 export function DistributionCard({ distribution }: DistributionCardProps) {
   const previousStatusRef = useRef<DistributionStatus | undefined>(undefined);
+  const queryClient = useQueryClient();
+
+  const handleStatusChange = async (status: DistributionStatus) => {
+    await queryClient.invalidateQueries({ queryKey: ['distributions'] });
+    const message = status === 'Deployed' ? 'Distribution паспяхова разгорнуты' : 'Distribution паспяхова выключаны';
+    toast.success(message, { description: `ID: ${distribution.id}` });
+  };
 
   useQuery<DistributionStatus | undefined>({
     queryKey: ['distribution-status', distribution.id],
@@ -27,13 +33,7 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
       !state.data || state.data === 'Deployed' || state.data === 'Disabled' ? false : 5000,
     select: (data: DistributionStatus | undefined) => {
       if (!data || data === previousStatusRef.current) return data;
-      if (data === 'Deployed' || data === 'Disabled')
-        revalidateDistributionsAction().then(() => {
-          toast.success(
-            data === 'Deployed' ? 'Distribution паспяхова разгорнуты' : 'Distribution паспяхова выключаны',
-            { description: `ID: ${distribution.id}` },
-          );
-        });
+      if (data === 'Deployed' || data === 'Disabled') handleStatusChange(data);
       previousStatusRef.current = data;
       return data;
     },

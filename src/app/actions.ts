@@ -9,7 +9,6 @@ import {
   enableDistribution,
   updateDistributionComments,
 } from '@/lib/aws';
-import { revalidatePath } from 'next/cache';
 
 export { authAction as authenticate, signOutAction as signOut };
 
@@ -22,38 +21,28 @@ interface CreateDistributionParams {
 export async function createDistributionAction(params: CreateDistributionParams) {
   await checkActionAuth();
   const result = await createDistribution(params);
-  revalidatePath('/');
   return result;
 }
 
 export async function deleteDistributionAction(id: string) {
   await checkActionAuth();
   const result = await deleteDistribution(id);
-  revalidatePath('/');
   return result;
 }
 
 export async function disableDistributionAction(id: string) {
   await checkActionAuth();
   const result = await disableDistribution(id);
-  revalidatePath('/');
   return result;
 }
 
 export async function enableDistributionAction(id: string) {
   await checkActionAuth();
   const result = await enableDistribution(id);
-  revalidatePath('/');
   return result;
-}
-
-export async function revalidateDistributionsAction() {
-  await checkActionAuth();
-  return revalidatePath('/');
 }
 
 export async function updateDistributionCommentsAction(id: string, newTags: string): Promise<void> {
   await checkActionAuth();
   await updateDistributionComments(id, newTags);
-  revalidatePath('/');
 }

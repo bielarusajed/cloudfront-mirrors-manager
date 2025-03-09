@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import type { DistributionSummary } from '@/types/distribution';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, Power, PowerOff, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -21,10 +21,13 @@ type ActionButtonsProps = {
 };
 
 export function ActionButtons({ distribution }: ActionButtonsProps) {
+  const queryClient = useQueryClient();
+
   const { mutate: deleteDistribution, isPending: isDeleting } = useMutation({
     mutationFn: async () => {
       if (!distribution.id) throw new Error('Немагчыма выдаліць distribution без ID');
       await deleteDistributionAction(distribution.id);
+      await queryClient.invalidateQueries({ queryKey: ['distributions'] });
     },
     onError: (error) =>
       toast.error('Не атрымалася выдаліць distribution', {
@@ -34,12 +37,13 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
 
   const { mutate: toggleStatus, isPending: isToggling } = useMutation({
     mutationFn: async () => {
-      if (!distribution.id) throw new Error('Немагчыма зменіць статус distribution без ID');
+      if (!distribution.id) throw new Error('Немагчыма змяніць статус distribution без ID');
       const action = distribution.enabled ? disableDistributionAction : enableDistributionAction;
       await action(distribution.id);
+      await queryClient.invalidateQueries({ queryKey: ['distributions'] });
     },
     onError: (error) =>
-      toast.error('Не атрымалася зменіць статус distribution', {
+      toast.error('Не атрымалася змяніць статус distribution', {
         description: error instanceof Error ? error.message : undefined,
       }),
   });
@@ -100,8 +104,17 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
                 className="w-full 2xl:w-auto"
                 disabled={isDeleting || isDisabling || isEnabling}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Выдаліць
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Выдаленне...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Выдаліць
+                  </>
+                )}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
@@ -114,16 +127,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Адмена</AlertDialogCancel>
-                <AlertDialogAction onClick={() => deleteDistribution()} disabled={isDeleting}>
-                  {isDeleting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Выдаленне...
-                    </>
-                  ) : (
-                    'Выдаліць'
-                  )}
-                </AlertDialogAction>
+                <AlertDialogAction onClick={() => deleteDistribution()}>Выдаліць</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
