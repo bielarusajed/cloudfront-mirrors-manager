@@ -2,12 +2,7 @@ export type DistributionOrigin = {
   domainName: string;
 };
 
-export type DistributionStatus =
-  | 'InProgress'
-  | 'Deployed'
-  | 'Disabled'
-  | 'Creating'
-  | 'Deleting';
+export type DistributionStatus = 'InProgress' | 'Deployed' | 'Disabled' | 'Creating' | 'Deleting';
 
 export type DistributionSummary = {
   id: string;

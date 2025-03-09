@@ -3,10 +3,7 @@ import { isAuthenticated } from './auth';
 
 export async function checkApiAuth() {
   if (!(await isAuthenticated())) {
-    return NextResponse.json(
-      { error: 'Неабходна аўтарызацыя' },
-      { status: 401 },
-    );
+    return NextResponse.json({ error: 'Неабходна аўтарызацыя' }, { status: 401 });
   }
   return null;
 }

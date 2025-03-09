@@ -22,13 +22,13 @@ const TagBadge = ({ tag, onDelete, disabled, isLoading }: TagBadgeProps) => (
   <Badge variant="outline" className={isLoading ? 'text-muted-foreground' : ''}>
     {tag.value}
     {isLoading ? (
-      <Loader2 className="h-3 w-3 ml-1 animate-spin" />
+      <Loader2 className="ml-1 h-3 w-3 animate-spin" />
     ) : (
       onDelete && (
         <Button
           variant="ghost"
           size="icon"
-          className="h-3 w-3 p-0 text-muted-foreground hover:bg-transparent hover:text-destructive transition-colors"
+          className="h-3 w-3 p-0 text-muted-foreground transition-colors hover:bg-transparent hover:text-destructive"
           onClick={() => onDelete(tag.value)}
           disabled={disabled}
         >
@@ -68,7 +68,7 @@ const AddTagInput = ({ onAdd, onCancel }: AddTagInputProps) => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        className="h-5 px-2 text-xs w-24"
+        className="h-5 w-24 px-2 text-xs"
         placeholder="Новы тэг..."
         autoFocus
       />
@@ -77,7 +77,7 @@ const AddTagInput = ({ onAdd, onCancel }: AddTagInputProps) => {
 };
 
 const AddTagButton = ({ onClick }: { onClick: () => void }) => (
-  <Badge variant="outline" className="flex items-center gap-1 cursor-pointer hover:bg-muted" onClick={onClick}>
+  <Badge variant="outline" className="flex cursor-pointer items-center gap-1 hover:bg-muted" onClick={onClick}>
     <Plus />
   </Badge>
 );
@@ -86,7 +86,7 @@ const StatusIndicator = ({ enabled, status }: { enabled: boolean; status: string
   if (status === 'InProgress') {
     return (
       <Badge variant="secondary">
-        <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+        <Loader2 className="mr-1 h-3 w-3 animate-spin" />
         {enabled ? 'Уключэнне...' : 'Выключэнне...'}
       </Badge>
     );
@@ -200,7 +200,7 @@ export function StatusBadge({ distribution }: StatusBadgeProps) {
   };
 
   return (
-    <div className="flex items-stretch flex-wrap gap-1">
+    <div className="flex flex-wrap items-stretch gap-1">
       <StatusIndicator enabled={enabled} status={status} />
       <TagsList
         existingTags={existingTags}

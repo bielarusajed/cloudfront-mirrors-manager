@@ -1,8 +1,4 @@
-import type {
-  AWSDistributionResponse,
-  CachePolicyResponse,
-  OriginRequestPolicyResponse,
-} from '@/types/aws';
+import type { AWSDistributionResponse, CachePolicyResponse, OriginRequestPolicyResponse } from '@/types/aws';
 import type {
   CreateDistributionRequest,
   CreateDistributionResponse,
@@ -119,9 +115,7 @@ export async function listDistributions(): Promise<AWSDistributionResponse> {
   }
 }
 
-export async function getDistributionETag(
-  id: string,
-): Promise<string | undefined> {
+export async function getDistributionETag(id: string): Promise<string | undefined> {
   try {
     const cloudfront = await getCloudFrontClient();
     const command = new GetDistributionCommand({ Id: id });
@@ -133,9 +127,7 @@ export async function getDistributionETag(
   }
 }
 
-export async function disableDistribution(
-  id: string,
-): Promise<UpdateDistributionResponse> {
+export async function disableDistribution(id: string): Promise<UpdateDistributionResponse> {
   try {
     const cloudfront = await getCloudFrontClient();
     const getCommand = new GetDistributionCommand({ Id: id });
@@ -173,9 +165,7 @@ export async function disableDistribution(
   }
 }
 
-export async function deleteDistribution(
-  id: string,
-): Promise<DeleteDistributionResponse> {
+export async function deleteDistribution(id: string): Promise<DeleteDistributionResponse> {
   try {
     // Спачатку выключаем distribution
     const disableResult = await disableDistribution(id);
@@ -209,9 +199,7 @@ export async function deleteDistribution(
   }
 }
 
-export async function enableDistribution(
-  id: string,
-): Promise<UpdateDistributionResponse> {
+export async function enableDistribution(id: string): Promise<UpdateDistributionResponse> {
   try {
     const cloudfront = await getCloudFrontClient();
     const getCommand = new GetDistributionCommand({ Id: id });
@@ -283,9 +271,7 @@ export async function listOriginRequestPolicies(): Promise<OriginRequestPolicyRe
   }
 }
 
-export async function getDistributionStatus(
-  id: string,
-): Promise<DistributionStatus | undefined> {
+export async function getDistributionStatus(id: string): Promise<DistributionStatus | undefined> {
   try {
     const cloudfront = await getCloudFrontClient();
     const command = new GetDistributionCommand({ Id: id });
@@ -297,10 +283,7 @@ export async function getDistributionStatus(
   }
 }
 
-export async function updateDistributionComments(
-  id: string,
-  comments: string,
-): Promise<UpdateDistributionResponse> {
+export async function updateDistributionComments(id: string, comments: string): Promise<UpdateDistributionResponse> {
   try {
     const cloudfront = await getCloudFrontClient();
     const getCommand = new GetDistributionCommand({ Id: id });

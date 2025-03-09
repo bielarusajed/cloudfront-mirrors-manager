@@ -1,7 +1,4 @@
-import {
-  CloudFrontClient,
-  ListDistributionsCommand,
-} from '@aws-sdk/client-cloudfront';
+import { CloudFrontClient, ListDistributionsCommand } from '@aws-sdk/client-cloudfront';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_NAME } from './constants';

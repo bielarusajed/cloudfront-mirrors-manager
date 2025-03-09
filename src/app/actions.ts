@@ -1,9 +1,6 @@
 'use server';
 
-import {
-  authenticate as authAction,
-  signOut as signOutAction,
-} from '@/lib/auth';
+import { authenticate as authAction, signOut as signOutAction } from '@/lib/auth';
 import {
   createDistribution,
   deleteDistribution,
@@ -12,10 +9,7 @@ import {
   updateDistributionComments,
 } from '@/lib/aws';
 import { getDistributions } from '@/lib/server-api';
-import type {
-  DistributionSummary,
-  UpdateDistributionResponse,
-} from '@/types/distribution';
+import type { DistributionSummary, UpdateDistributionResponse } from '@/types/distribution';
 import { revalidatePath } from 'next/cache';
 
 export { authAction as authenticate, signOutAction as signOut };
@@ -26,9 +20,7 @@ interface CreateDistributionParams {
   originRequestPolicyId: string;
 }
 
-export async function createDistributionAction(
-  params: CreateDistributionParams,
-) {
+export async function createDistributionAction(params: CreateDistributionParams) {
   const result = await createDistribution(params);
   await revalidatePath('/');
   return result;

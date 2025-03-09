@@ -1,19 +1,9 @@
-import type {
-  DistributionStatus,
-  DistributionsListResponse,
-} from '@/types/distribution';
+import type { DistributionStatus, DistributionsListResponse } from '@/types/distribution';
 import type { PoliciesResponse } from './api';
-import {
-  listCachePolicies,
-  listDistributions,
-  listOriginRequestPolicies,
-} from './aws';
+import { listCachePolicies, listDistributions, listOriginRequestPolicies } from './aws';
 
 export async function getPolicies(): Promise<PoliciesResponse> {
-  const [cacheResponse, originResponse] = await Promise.all([
-    listCachePolicies(),
-    listOriginRequestPolicies(),
-  ]);
+  const [cacheResponse, originResponse] = await Promise.all([listCachePolicies(), listOriginRequestPolicies()]);
 
   return {
     cachePolicies: cacheResponse.error ? [] : cacheResponse.items,
@@ -30,9 +20,7 @@ export async function getDistributions(): Promise<DistributionsListResponse> {
       status: (item.Status || 'InProgress') as DistributionStatus,
       enabled: item.Enabled || false,
       domainName: item.DomainName || '',
-      lastModifiedTime: item.LastModifiedTime
-        ? new Date(item.LastModifiedTime)
-        : undefined,
+      lastModifiedTime: item.LastModifiedTime ? new Date(item.LastModifiedTime) : undefined,
       origins:
         item.Origins?.Items?.map((origin) => ({
           domainName: origin.DomainName || '',

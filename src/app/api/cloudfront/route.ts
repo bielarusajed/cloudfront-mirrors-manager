@@ -24,10 +24,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Error listing CloudFront distributions:', error);
-    return NextResponse.json(
-      { error: 'Failed to list CloudFront distributions' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Failed to list CloudFront distributions' }, { status: 500 });
   }
 }
 
@@ -41,10 +38,7 @@ export async function POST(request: NextRequest) {
     const { originDomain, enabled = true } = body;
 
     if (!originDomain) {
-      return NextResponse.json(
-        { error: 'originDomain is required' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'originDomain is required' }, { status: 400 });
     }
 
     const cloudfront = await getCloudFrontClient();
@@ -94,10 +88,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ distribution: response.Distribution });
   } catch (error) {
     console.error('Error creating CloudFront distribution:', error);
-    return NextResponse.json(
-      { error: 'Failed to create CloudFront distribution' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Failed to create CloudFront distribution' }, { status: 500 });
   }
 }
 
@@ -111,10 +102,7 @@ export async function DELETE(request: NextRequest) {
     const id = searchParams.get('id');
 
     if (!id) {
-      return NextResponse.json(
-        { error: 'Distribution ID is required' },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: 'Distribution ID is required' }, { status: 400 });
     }
 
     const cloudfront = await getCloudFrontClient();
@@ -124,10 +112,7 @@ export async function DELETE(request: NextRequest) {
     const distribution = await cloudfront.send(getCommand);
 
     if (!distribution.Distribution || !distribution.ETag) {
-      return NextResponse.json(
-        { error: 'Distribution not found' },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: 'Distribution not found' }, { status: 404 });
     }
 
     // Калі distribution уключаны, мы павінны спачатку яго выключыць
@@ -146,8 +131,7 @@ export async function DELETE(request: NextRequest) {
 
       return NextResponse.json(
         {
-          message:
-            "Distribution is being disabled. Please try deleting again once it's disabled.",
+          message: "Distribution is being disabled. Please try deleting again once it's disabled.",
         },
         { status: 202 },
       );
@@ -165,9 +149,6 @@ export async function DELETE(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error deleting CloudFront distribution:', error);
-    return NextResponse.json(
-      { error: 'Failed to delete CloudFront distribution' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Failed to delete CloudFront distribution' }, { status: 500 });
   }
 }

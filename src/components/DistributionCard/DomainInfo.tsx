@@ -21,16 +21,11 @@ export function DomainInfo({ distribution }: DomainInfoProps) {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="font-mono text-sm hover:underline text-muted-foreground truncate"
+        className="truncate font-mono text-muted-foreground text-sm hover:underline"
       >
         {distribution.domainName}
       </a>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-4 w-4 p-0 ml-1 shrink-0"
-        onClick={handleCopy}
-      >
+      <Button variant="ghost" size="icon" className="ml-1 h-4 w-4 shrink-0 p-0" onClick={handleCopy}>
         <Copy className="h-3 w-3" />
       </Button>
     </div>

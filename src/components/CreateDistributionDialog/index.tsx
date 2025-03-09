@@ -13,28 +13,11 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { fetchPolicies } from '@/lib/api';
-import type {
-  CachePolicySummary,
-  OriginRequestPolicySummary,
-} from '@aws-sdk/client-cloudfront';
+import type { CachePolicySummary, OriginRequestPolicySummary } from '@aws-sdk/client-cloudfront';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useQuery } from '@tanstack/react-query';
 import { Loader2, Plus } from 'lucide-react';
@@ -106,16 +89,14 @@ export function CreateDistributionDialog() {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button className="w-full md:w-auto">
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Стварыць Distribution
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Стварыць Distribution</AlertDialogTitle>
-          <AlertDialogDescription>
-            Запоўніце форму для стварэння новага CloudFront distribution.
-          </AlertDialogDescription>
+          <AlertDialogDescription>Запоўніце форму для стварэння новага CloudFront distribution.</AlertDialogDescription>
         </AlertDialogHeader>
         <Form {...form}>
           <div className="space-y-4">
@@ -128,9 +109,7 @@ export function CreateDistributionDialog() {
                   <FormControl>
                     <Input placeholder="origin.example.com" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Дамен, з якога будуць загружацца файлы
-                  </FormDescription>
+                  <FormDescription>Дамен, з якога будуць загружацца файлы</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -141,32 +120,23 @@ export function CreateDistributionDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Палітыка кэшавання</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Выберыце палітыку кэшавання">
                           {field.value
-                            ? cachePolicies.find(
-                                (p) => p.CachePolicy?.Id === field.value,
-                              )?.CachePolicy?.CachePolicyConfig?.Name
+                            ? cachePolicies.find((p) => p.CachePolicy?.Id === field.value)?.CachePolicy
+                                ?.CachePolicyConfig?.Name
                             : null}
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {cachePolicies.map((policy) => (
-                        <SelectItem
-                          key={policy.CachePolicy?.Id}
-                          value={policy.CachePolicy?.Id || ''}
-                        >
+                        <SelectItem key={policy.CachePolicy?.Id} value={policy.CachePolicy?.Id || ''}>
                           <div className="flex flex-col gap-1">
-                            <div>
-                              {policy.CachePolicy?.CachePolicyConfig?.Name}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
+                            <div>{policy.CachePolicy?.CachePolicyConfig?.Name}</div>
+                            <div className="text-muted-foreground text-xs">
                               {policy.CachePolicy?.CachePolicyConfig?.Comment}
                             </div>
                           </div>
@@ -174,9 +144,7 @@ export function CreateDistributionDialog() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Выберыце палітыку кэшавання для distribution
-                  </FormDescription>
+                  <FormDescription>Выберыце палітыку кэшавання для distribution</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -187,50 +155,31 @@ export function CreateDistributionDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Палітыка запытаў да крыніцы</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="Выберыце палітыку запытаў">
                           {field.value
-                            ? originRequestPolicies.find(
-                                (p) =>
-                                  p.OriginRequestPolicy?.Id === field.value,
-                              )?.OriginRequestPolicy?.OriginRequestPolicyConfig
-                                ?.Name
+                            ? originRequestPolicies.find((p) => p.OriginRequestPolicy?.Id === field.value)
+                                ?.OriginRequestPolicy?.OriginRequestPolicyConfig?.Name
                             : null}
                         </SelectValue>
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
                       {originRequestPolicies.map((policy) => (
-                        <SelectItem
-                          key={policy.OriginRequestPolicy?.Id}
-                          value={policy.OriginRequestPolicy?.Id || ''}
-                        >
+                        <SelectItem key={policy.OriginRequestPolicy?.Id} value={policy.OriginRequestPolicy?.Id || ''}>
                           <div className="flex flex-col gap-1">
-                            <div>
-                              {
-                                policy.OriginRequestPolicy
-                                  ?.OriginRequestPolicyConfig?.Name
-                              }
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {
-                                policy.OriginRequestPolicy
-                                  ?.OriginRequestPolicyConfig?.Comment
-                              }
+                            <div>{policy.OriginRequestPolicy?.OriginRequestPolicyConfig?.Name}</div>
+                            <div className="text-muted-foreground text-xs">
+                              {policy.OriginRequestPolicy?.OriginRequestPolicyConfig?.Comment}
                             </div>
                           </div>
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    Выберыце палітыку запытаў да крыніцы
-                  </FormDescription>
+                  <FormDescription>Выберыце палітыку запытаў да крыніцы</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -244,9 +193,7 @@ export function CreateDistributionDialog() {
                   <FormControl>
                     <Input placeholder="tag1;tag2;tag3" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    Спіс тэгаў, падзеленых кропкай з коскай (;)
-                  </FormDescription>
+                  <FormDescription>Спіс тэгаў, падзеленых кропкай з коскай (;)</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -256,7 +203,7 @@ export function CreateDistributionDialog() {
               <AlertDialogAction onClick={onSubmit} disabled={isPending}>
                 {isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Стварэнне...
                   </>
                 ) : (

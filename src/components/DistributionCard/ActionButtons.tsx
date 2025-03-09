@@ -30,10 +30,8 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
   const [isDeleting, startDeleting] = useTransition();
   const [isToggling, startToggling] = useTransition();
 
-  const isDisabling =
-    distribution.status === 'InProgress' && !distribution.enabled;
-  const isEnabling =
-    distribution.status === 'InProgress' && distribution.enabled;
+  const isDisabling = distribution.status === 'InProgress' && !distribution.enabled;
+  const isEnabling = distribution.status === 'InProgress' && distribution.enabled;
 
   const handleDelete = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
@@ -64,12 +62,9 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
           toast.error('Немагчыма зменіць статус distribution без ID');
           return;
         }
-        const action = distribution.enabled
-          ? disableDistributionAction
-          : enableDistributionAction;
+        const action = distribution.enabled ? disableDistributionAction : enableDistributionAction;
         const result = await action(distribution.id);
-        if (result.error)
-          toast.error(result.error, { description: `ID: ${distribution.id}` });
+        if (result.error) toast.error(result.error, { description: `ID: ${distribution.id}` });
       } catch (error) {
         toast.error('Не атрымалася зменіць статус distribution', {
           description: `ID: ${distribution.id}`,
@@ -79,7 +74,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
   };
 
   return (
-    <div className="flex flex-col 2xl:flex-row gap-2 w-full 2xl:w-auto">
+    <div className="flex w-full flex-col gap-2 2xl:w-auto 2xl:flex-row">
       {distribution.enabled ? (
         <Button
           variant="destructive"
@@ -90,12 +85,12 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
         >
           {isDisabling || isToggling ? (
             <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Выключэнне...
             </>
           ) : (
             <>
-              <PowerOff className="h-4 w-4 mr-2" />
+              <PowerOff className="mr-2 h-4 w-4" />
               Выключыць
             </>
           )}
@@ -111,12 +106,12 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
           >
             {isEnabling || isToggling ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Уключэнне...
               </>
             ) : (
               <>
-                <Power className="h-4 w-4 mr-2" />
+                <Power className="mr-2 h-4 w-4" />
                 Уключыць
               </>
             )}
@@ -129,7 +124,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
                 className="w-full 2xl:w-auto"
                 disabled={isDeleting || isDisabling || isEnabling}
               >
-                <Trash2 className="h-4 w-4 mr-2" />
+                <Trash2 className="mr-2 h-4 w-4" />
                 Выдаліць
               </Button>
             </AlertDialogTrigger>
@@ -137,8 +132,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
               <AlertDialogHeader>
                 <AlertDialogTitle>Выдаліць Distribution?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Гэта дзеянне нельга адмяніць. Гэта назаўсёды выдаліць
-                  distribution{' '}
+                  Гэта дзеянне нельга адмяніць. Гэта назаўсёды выдаліць distribution{' '}
                   <span className="font-mono">{distribution.id}</span>.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -147,7 +141,7 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
                 <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
                   {isDeleting ? (
                     <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Выдаленне...
                     </>
                   ) : (

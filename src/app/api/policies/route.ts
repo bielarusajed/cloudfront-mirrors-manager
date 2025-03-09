@@ -11,9 +11,6 @@ export async function GET() {
     return NextResponse.json(response);
   } catch (error) {
     console.error('Error fetching policies:', error);
-    return NextResponse.json(
-      { error: 'Не атрымалася атрымаць палітыкі' },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: 'Не атрымалася атрымаць палітыкі' }, { status: 500 });
   }
 }

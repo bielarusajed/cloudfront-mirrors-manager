@@ -1,21 +1,9 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AWS_DEFAULT_REGION, AWS_REGIONS } from '@/lib/constants';
 import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -44,32 +32,20 @@ export function SignInForm() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center">
+    <div className="flex h-screen items-center justify-center">
       <div className="container max-w-[450px]">
         <Card>
           <CardHeader>
             <CardTitle>Уваход з AWS крэдэнцыяламі</CardTitle>
-            <CardDescription>
-              Увядзіце вашы AWS крэдэнцыялы для доступу
-            </CardDescription>
+            <CardDescription>Увядзіце вашы AWS крэдэнцыялы для доступу</CardDescription>
           </CardHeader>
           <CardContent>
             <form action={onSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Input
-                  type="text"
-                  name="accessKeyId"
-                  placeholder="AWS Access Key ID"
-                  required
-                />
+                <Input type="text" name="accessKeyId" placeholder="AWS Access Key ID" required />
               </div>
               <div className="space-y-2">
-                <Input
-                  type="password"
-                  name="secretAccessKey"
-                  placeholder="AWS Secret Access Key"
-                  required
-                />
+                <Input type="password" name="secretAccessKey" placeholder="AWS Secret Access Key" required />
               </div>
               <div className="space-y-2">
                 <Select value={region} onValueChange={setRegion}>
@@ -78,21 +54,15 @@ export function SignInForm() {
                   </SelectTrigger>
                   <SelectContent>
                     {AWS_REGIONS.map((region) => (
-                      <SelectItem
-                        key={region.value}
-                        value={region.value}
-                        className="flex flex-col items-start gap-1"
-                      >
+                      <SelectItem key={region.value} value={region.value} className="flex flex-col items-start gap-1">
                         <div className="font-medium">{region.value}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {region.label}
-                        </div>
+                        <div className="text-muted-foreground text-xs">{region.label}</div>
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {error && <p className="text-destructive text-sm">{error}</p>}
               <SubmitButton />
             </form>
           </CardContent>
