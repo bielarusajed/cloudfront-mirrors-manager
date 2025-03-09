@@ -37,5 +37,4 @@ export type DeleteDistributionResponse = {
 
 export type DistributionsListResponse = {
   items: DistributionSummary[];
-  error?: string;
 };

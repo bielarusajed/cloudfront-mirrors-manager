@@ -1,11 +1,7 @@
-import type { AWSDistributionResponse, CachePolicyResponse, OriginRequestPolicyResponse } from '@/types/aws';
-import type {
-  CreateDistributionRequest,
-  DeleteDistributionResponse,
-  DistributionStatus,
-  UpdateDistributionResponse,
-} from '@/types/distribution';
+import type { CreateDistributionRequest, DistributionStatus } from '@/types/distribution';
 import {
+  type DistributionSummary as AWSDistributionSummary,
+  type CachePolicySummary,
   CloudFrontClient,
   CreateDistributionCommand,
   DeleteDistributionCommand,
@@ -13,6 +9,7 @@ import {
   ListCachePoliciesCommand,
   ListDistributionsCommand,
   ListOriginRequestPoliciesCommand,
+  type OriginRequestPolicySummary,
   UpdateDistributionCommand,
 } from '@aws-sdk/client-cloudfront';
 import { getAwsCredentials } from './auth';
@@ -90,33 +87,21 @@ export async function createDistribution({
   };
 }
 
-export async function listDistributions(): Promise<AWSDistributionResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const command = new ListDistributionsCommand({});
-    const response = await cloudfront.send(command);
-    return {
-      items: response.DistributionList?.Items || [],
-    };
-  } catch (error) {
-    console.error('Error listing distributions:', error);
-    return {
-      items: [],
-      error: 'Не атрымалася атрымаць спіс distributions',
-    };
-  }
+export async function listDistributions(): Promise<AWSDistributionSummary[]> {
+  const cloudfront = await getCloudFrontClient();
+  const command = new ListDistributionsCommand({});
+  const response = await cloudfront.send(command);
+  return response.DistributionList?.Items || [];
 }
 
-export async function getDistributionETag(id: string): Promise<string | undefined> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const command = new GetDistributionCommand({ Id: id });
-    const response = await cloudfront.send(command);
-    return response.ETag;
-  } catch (error) {
-    console.error('Error getting distribution ETag:', error);
-    return undefined;
-  }
+export async function getDistributionETag(id: string): Promise<string> {
+  const cloudfront = await getCloudFrontClient();
+  const command = new GetDistributionCommand({ Id: id });
+  const response = await cloudfront.send(command);
+
+  if (!response.ETag) throw new Error('Не атрымалася атрымаць ETag для distribution');
+
+  return response.ETag;
 }
 
 export async function disableDistribution(id: string): Promise<void> {
@@ -180,38 +165,18 @@ export async function enableDistribution(id: string): Promise<void> {
   await cloudfront.send(updateCommand);
 }
 
-export async function listCachePolicies(): Promise<CachePolicyResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const command = new ListCachePoliciesCommand({});
-    const response = await cloudfront.send(command);
-    return {
-      items: response.CachePolicyList?.Items || [],
-    };
-  } catch (error) {
-    console.error('Error listing cache policies:', error);
-    return {
-      items: [],
-      error: 'Не атрымалася атрымаць спіс палітык кэшавання',
-    };
-  }
+export async function listCachePolicies(): Promise<CachePolicySummary[]> {
+  const cloudfront = await getCloudFrontClient();
+  const command = new ListCachePoliciesCommand({});
+  const response = await cloudfront.send(command);
+  return response.CachePolicyList?.Items || [];
 }
 
-export async function listOriginRequestPolicies(): Promise<OriginRequestPolicyResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const command = new ListOriginRequestPoliciesCommand({});
-    const response = await cloudfront.send(command);
-    return {
-      items: response.OriginRequestPolicyList?.Items || [],
-    };
-  } catch (error) {
-    console.error('Error listing origin request policies:', error);
-    return {
-      items: [],
-      error: 'Не атрымалася атрымаць спіс палітык запытаў да крыніц',
-    };
-  }
+export async function listOriginRequestPolicies(): Promise<OriginRequestPolicySummary[]> {
+  const cloudfront = await getCloudFrontClient();
+  const command = new ListOriginRequestPoliciesCommand({});
+  const response = await cloudfront.send(command);
+  return response.OriginRequestPolicyList?.Items || [];
 }
 
 export async function getDistributionStatus(id: string): Promise<DistributionStatus | undefined> {

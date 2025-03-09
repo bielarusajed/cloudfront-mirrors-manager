@@ -3,19 +3,14 @@ import type { PoliciesResponse } from './api';
 import { listCachePolicies, listDistributions, listOriginRequestPolicies } from './aws';
 
 export async function getPolicies(): Promise<PoliciesResponse> {
-  const [cacheResponse, originResponse] = await Promise.all([listCachePolicies(), listOriginRequestPolicies()]);
-
-  return {
-    cachePolicies: cacheResponse.error ? [] : cacheResponse.items,
-    originRequestPolicies: originResponse.error ? [] : originResponse.items,
-    error: cacheResponse.error || originResponse.error,
-  };
+  const [cachePolicies, originRequestPolicies] = await Promise.all([listCachePolicies(), listOriginRequestPolicies()]);
+  return { cachePolicies, originRequestPolicies };
 }
 
 export async function getDistributions(): Promise<DistributionsListResponse> {
-  const response = await listDistributions();
+  const items = await listDistributions();
   return {
-    items: response.items.map((item) => ({
+    items: items.map((item) => ({
       id: item.Id || '',
       status: (item.Status || 'InProgress') as DistributionStatus,
       enabled: item.Enabled || false,
@@ -27,6 +22,5 @@ export async function getDistributions(): Promise<DistributionsListResponse> {
         })) || [],
       comments: item.Comment || undefined,
     })),
-    error: response.error,
   };
 }

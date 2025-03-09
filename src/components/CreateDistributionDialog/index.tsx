@@ -21,7 +21,7 @@ import type { CachePolicySummary, OriginRequestPolicySummary } from '@aws-sdk/cl
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Loader2, Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { type FormValues, formSchema } from './schema';
@@ -34,17 +34,18 @@ type Policies = {
 export function CreateDistributionDialog() {
   const [open, setOpen] = useState(false);
 
-  const { data } = useQuery<Policies>({
+  const { data, error } = useQuery<Policies>({
     queryKey: ['policies'],
-    queryFn: async () => {
-      const response = await fetchPolicies();
-      if (response.error) toast.error(response.error);
-      return {
-        cachePolicies: response.cachePolicies,
-        originRequestPolicies: response.originRequestPolicies,
-      };
-    },
+    queryFn: fetchPolicies,
+    retry: 3,
   });
+
+  useEffect(() => {
+    if (error)
+      toast.error('Не атрымалася загрузіць палітыкі', {
+        description: error instanceof Error ? error.message : undefined,
+      });
+  }, [error]);
 
   const cachePolicies = data?.cachePolicies ?? [];
   const originRequestPolicies = data?.originRequestPolicies ?? [];

@@ -12,12 +12,13 @@ import { getBaseUrl } from './utils';
 export type PoliciesResponse = {
   cachePolicies: CachePolicySummary[];
   originRequestPolicies: OriginRequestPolicySummary[];
-  error?: string;
 };
 
 export async function fetchDistributions(): Promise<DistributionsListResponse> {
-  const response = await fetch(`${getBaseUrl()}/api/distributions`);
-  return response.json();
+  const response = await fetch('/api/distributions');
+  const data = await response.json();
+  if ('error' in data) throw new Error(data.error);
+  return data;
 }
 
 export async function fetchPolicies(): Promise<PoliciesResponse> {

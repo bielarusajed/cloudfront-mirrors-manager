@@ -9,7 +9,6 @@ import {
   enableDistribution,
   updateDistributionComments,
 } from '@/lib/aws';
-import type { UpdateDistributionResponse } from '@/types/distribution';
 import { revalidatePath } from 'next/cache';
 
 export { authAction as authenticate, signOutAction as signOut };
