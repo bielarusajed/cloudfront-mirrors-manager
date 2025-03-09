@@ -1,5 +1,6 @@
 'use server';
 
+import { checkActionAuth } from '@/lib/action-auth';
 import { authenticate as authAction, signOut as signOutAction } from '@/lib/auth';
 import {
   createDistribution,
@@ -8,8 +9,7 @@ import {
   enableDistribution,
   updateDistributionComments,
 } from '@/lib/aws';
-import { getDistributions } from '@/lib/server-api';
-import type { DistributionSummary, UpdateDistributionResponse } from '@/types/distribution';
+import type { UpdateDistributionResponse } from '@/types/distribution';
 import { revalidatePath } from 'next/cache';
 
 export { authAction as authenticate, signOutAction as signOut };
@@ -21,30 +21,35 @@ interface CreateDistributionParams {
 }
 
 export async function createDistributionAction(params: CreateDistributionParams) {
+  await checkActionAuth();
   const result = await createDistribution(params);
   await revalidatePath('/');
   return result;
 }
 
 export async function deleteDistributionAction(id: string) {
+  await checkActionAuth();
   const result = await deleteDistribution(id);
   await revalidatePath('/');
   return result;
 }
 
 export async function disableDistributionAction(id: string) {
+  await checkActionAuth();
   const result = await disableDistribution(id);
   await revalidatePath('/');
   return result;
 }
 
 export async function enableDistributionAction(id: string) {
+  await checkActionAuth();
   const result = await enableDistribution(id);
   await revalidatePath('/');
   return result;
 }
 
 export async function revalidateDistributionsAction() {
+  await checkActionAuth();
   return revalidatePath('/');
 }
 
@@ -52,6 +57,7 @@ export async function updateDistributionCommentsAction(
   id: string,
   newTags: string,
 ): Promise<UpdateDistributionResponse> {
+  await checkActionAuth();
   const result = await updateDistributionComments(id, newTags);
   await revalidatePath('/');
   return result;
