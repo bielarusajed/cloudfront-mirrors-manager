@@ -11,7 +11,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     const status = await getDistributionStatus(id);
     return NextResponse.json({ status });
   } catch (error) {
-    console.error('Error fetching distribution status:', error);
-    return NextResponse.json({ error: 'Не атрымалася атрымаць статус distribution' }, { status: 500 });
+    console.error('Error getting CloudFront distribution status:', error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Невядомая памылка' }, { status: 500 });
   }
 }

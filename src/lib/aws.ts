@@ -179,16 +179,14 @@ export async function listOriginRequestPolicies(): Promise<OriginRequestPolicySu
   return response.OriginRequestPolicyList?.Items || [];
 }
 
-export async function getDistributionStatus(id: string): Promise<DistributionStatus | undefined> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const command = new GetDistributionCommand({ Id: id });
-    const response = await cloudfront.send(command);
-    return response.Distribution?.Status as DistributionStatus;
-  } catch (error) {
-    console.error('Error getting distribution status:', error);
-    return undefined;
-  }
+export async function getDistributionStatus(id: string): Promise<DistributionStatus> {
+  const cloudfront = await getCloudFrontClient();
+  const command = new GetDistributionCommand({ Id: id });
+  const response = await cloudfront.send(command);
+
+  if (!response.Distribution?.Status) throw new Error('Не атрымалася атрымаць статус distribution');
+
+  return response.Distribution.Status as DistributionStatus;
 }
 
 export async function updateDistributionComments(id: string, comments: string): Promise<void> {

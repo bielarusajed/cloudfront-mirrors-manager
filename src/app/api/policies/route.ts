@@ -7,10 +7,10 @@ export async function GET() {
   if (authError) return authError;
 
   try {
-    const response = await getPolicies();
-    return NextResponse.json(response);
+    const policies = await getPolicies();
+    return NextResponse.json(policies);
   } catch (error) {
-    console.error('Error fetching policies:', error);
-    return NextResponse.json({ error: 'Не атрымалася атрымаць палітыкі' }, { status: 500 });
+    console.error('Error getting CloudFront policies:', error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Невядомая памылка' }, { status: 500 });
   }
 }

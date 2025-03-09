@@ -5,19 +5,14 @@ import { type NextRequest, NextResponse } from 'next/server';
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const authError = await checkApiAuth();
   if (authError) return authError;
-  const { id } = await params;
 
   try {
+    const { id } = await params;
     const { comments } = await request.json();
-    const result = await updateDistributionComments(id, comments);
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json({});
+    await updateDistributionComments(id, comments);
+    return new NextResponse(null, { status: 204 });
   } catch (error) {
-    console.error('Error updating distribution comments:', error);
-    return NextResponse.json({ error: 'Не атрымалася абнавіць тэгі distribution' }, { status: 500 });
+    console.error('Error updating CloudFront distribution comments:', error);
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Невядомая памылка' }, { status: 500 });
   }
 }
