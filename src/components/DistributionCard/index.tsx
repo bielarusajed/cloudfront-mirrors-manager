@@ -8,9 +8,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { toast } from 'sonner';
 import { ActionButtons } from './ActionButtons';
+import { BadgesSection } from './BadgesSection';
 import { DistributionInfo as DistributionInfoComponent } from './DistributionInfo';
 import { DomainInfo } from './DomainInfo';
-import { StatusBadge } from './StatusBadge';
 
 type DistributionCardProps = {
   distribution: DistributionSummary;
@@ -48,7 +48,7 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
         </div>
       </CardHeader>
       <CardContent className="space-y-1">
-        <StatusBadge distribution={distribution} />
+        <BadgesSection distribution={distribution} />
         <DomainInfo distribution={distribution} />
         <DistributionInfoComponent distribution={distribution} />
       </CardContent>
