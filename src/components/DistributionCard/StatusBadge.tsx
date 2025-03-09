@@ -3,8 +3,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { DistributionSummary } from '@/types/distribution';
+import { useMutation } from '@tanstack/react-query';
 import { Loader2, Plus, X } from 'lucide-react';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 type Tag = {
@@ -119,9 +120,7 @@ const TagsList = ({
   onStartAdd,
   isPending,
   pendingOperation,
-}: TagsListProps & {
-  pendingOperation: { type: 'add' | 'delete'; tag: string } | null;
-}) => (
+}: TagsListProps) => (
   <>
     {existingTags.map((tag) => (
       <TagBadge
@@ -146,11 +145,6 @@ type StatusBadgeProps = {
   distribution: DistributionSummary;
 };
 
-type PendingOperation = {
-  type: 'add' | 'delete';
-  tag: string;
-};
-
 function parseTags(commentsString?: string): Tag[] {
   const tags = commentsString?.split(';').filter(Boolean) || [];
   return tags.map((tag) => ({ value: tag.trim() }));
@@ -158,59 +152,50 @@ function parseTags(commentsString?: string): Tag[] {
 
 export function StatusBadge({ distribution }: StatusBadgeProps) {
   const { status, enabled, comments, id } = distribution;
-  const [isPending, startTransition] = useTransition();
   const [isAddingTag, setIsAddingTag] = useState(false);
-  const [pendingOperation, setPendingOperation] = useState<PendingOperation | null>(null);
+  const [pendingTag, setPendingTag] = useState<{ type: 'add' | 'delete'; tag: string } | null>(null);
 
   const existingTags = parseTags(comments);
 
-  const handleDeleteTag = (tagToDelete: string) => {
-    setPendingOperation({ type: 'delete', tag: tagToDelete });
-    startTransition(async () => {
-      try {
-        const newTags = existingTags
-          .filter((tag) => tag.value !== tagToDelete)
-          .map((tag) => tag.value)
-          .join(';');
+  const { mutate: updateTags, isPending } = useMutation({
+    mutationFn: async ({ type, tag }: { type: 'add' | 'delete'; tag: string }) => {
+      if (!id) throw new Error('Немагчыма абнавіць тэгі distribution без ID');
 
-        const result = await updateDistributionCommentsAction(id, newTags);
-        if (result.error) toast.error(result.error);
-      } catch (error) {
-        toast.error('Не атрымалася выдаліць тэг');
-      }
-      setPendingOperation(null);
-    });
-  };
+      const newTags =
+        type === 'add'
+          ? [...existingTags.map((t) => t.value), tag].join(';')
+          : existingTags
+              .filter((t) => t.value !== tag)
+              .map((t) => t.value)
+              .join(';');
 
-  const handleAddTag = async (newTag: string) => {
-    setIsAddingTag(false);
-    setPendingOperation({ type: 'add', tag: newTag });
-
-    startTransition(async () => {
-      try {
-        const newTags = [...existingTags.map((tag) => tag.value), newTag].join(';');
-        const result = await updateDistributionCommentsAction(id, newTags);
-        if (result.error) toast.error(result.error);
-      } catch (error) {
-        toast.error('Не атрымалася дадаць тэг');
-      } finally {
-        setPendingOperation(null);
-      }
-    });
-  };
+      await updateDistributionCommentsAction(id, newTags);
+    },
+    onMutate: (variables) => {
+      setIsAddingTag(false);
+      setPendingTag(variables);
+      return variables;
+    },
+    onSettled: () => setPendingTag(null),
+    onError: (error) => {
+      toast.error('Не атрымалася абнавіць тэгі', {
+        description: error instanceof Error ? error.message : undefined,
+      });
+    },
+  });
 
   return (
     <div className="flex flex-wrap items-stretch gap-1">
       <StatusIndicator enabled={enabled} status={status} />
       <TagsList
         existingTags={existingTags}
-        onDeleteTag={handleDeleteTag}
+        onDeleteTag={(tag: string) => updateTags({ type: 'delete', tag })}
         isAddingTag={isAddingTag}
-        onAddTag={handleAddTag}
+        onAddTag={(tag: string) => updateTags({ type: 'add', tag })}
         onCancelAdd={() => setIsAddingTag(false)}
         onStartAdd={() => setIsAddingTag(true)}
         isPending={isPending}
-        pendingOperation={pendingOperation}
+        pendingOperation={pendingTag}
       />
     </div>
   );

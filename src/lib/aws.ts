@@ -226,39 +226,27 @@ export async function getDistributionStatus(id: string): Promise<DistributionSta
   }
 }
 
-export async function updateDistributionComments(id: string, comments: string): Promise<UpdateDistributionResponse> {
-  try {
-    const cloudfront = await getCloudFrontClient();
-    const getCommand = new GetDistributionCommand({ Id: id });
-    const distribution = await cloudfront.send(getCommand);
+export async function updateDistributionComments(id: string, comments: string): Promise<void> {
+  const cloudfront = await getCloudFrontClient();
+  const getCommand = new GetDistributionCommand({ Id: id });
+  const distribution = await cloudfront.send(getCommand);
 
-    if (!distribution.Distribution || !distribution.ETag) {
-      return {
-        error: 'Не атрымалася атрымаць інфармацыю аб distribution',
-      };
-    }
-
-    const config = distribution.Distribution.DistributionConfig;
-    if (!config) {
-      return {
-        error: 'Не атрымалася атрымаць канфігурацыю distribution',
-      };
-    }
-
-    config.Comment = comments;
-
-    const updateCommand = new UpdateDistributionCommand({
-      Id: id,
-      DistributionConfig: config,
-      IfMatch: distribution.ETag,
-    });
-
-    await cloudfront.send(updateCommand);
-    return {};
-  } catch (error) {
-    console.error('Error updating distribution comments:', error);
-    return {
-      error: 'Не атрымалася абнавіць тэгі distribution',
-    };
+  if (!distribution.Distribution || !distribution.ETag) {
+    throw new Error('Не атрымалася атрымаць інфармацыю аб distribution');
   }
+
+  const config = distribution.Distribution.DistributionConfig;
+  if (!config) {
+    throw new Error('Не атрымалася атрымаць канфігурацыю distribution');
+  }
+
+  config.Comment = comments;
+
+  const updateCommand = new UpdateDistributionCommand({
+    Id: id,
+    DistributionConfig: config,
+    IfMatch: distribution.ETag,
+  });
+
+  await cloudfront.send(updateCommand);
 }

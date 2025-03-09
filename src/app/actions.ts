@@ -53,12 +53,8 @@ export async function revalidateDistributionsAction() {
   return revalidatePath('/');
 }
 
-export async function updateDistributionCommentsAction(
-  id: string,
-  newTags: string,
-): Promise<UpdateDistributionResponse> {
+export async function updateDistributionCommentsAction(id: string, newTags: string): Promise<void> {
   await checkActionAuth();
-  const result = await updateDistributionComments(id, newTags);
+  await updateDistributionComments(id, newTags);
   revalidatePath('/');
-  return result;
 }
