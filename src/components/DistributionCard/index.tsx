@@ -40,16 +40,16 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
   });
 
   return (
-    <Card className="gap-2">
+    <Card className="gap-2.5">
       <CardHeader>
         <div className="flex w-full items-center justify-between">
           <CardTitle className="text-muted-foreground text-sm">ID: {distribution.id}</CardTitle>
           <ActionButtons distribution={distribution} />
         </div>
       </CardHeader>
-      <CardContent className="space-y-1.5">
-        <DomainInfo distribution={distribution} />
+      <CardContent className="space-y-1">
         <StatusBadge distribution={distribution} />
+        <DomainInfo distribution={distribution} />
         <DistributionInfoComponent distribution={distribution} />
       </CardContent>
     </Card>
