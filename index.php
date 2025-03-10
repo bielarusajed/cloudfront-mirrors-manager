@@ -29,6 +29,11 @@ function checkWebsiteAvailability($url) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Дазваляем CORS
+    header('Access-Control-Allow-Origin: *');  // Усе дамены. Для бяспекі лепш указаць канкрэтны дамен
+    header('Access-Control-Allow-Methods: POST');
+    header('Access-Control-Allow-Headers: Content-Type');
+    
     header('Content-Type: application/json');
     $url = $_POST['url'] ?? '';
     echo json_encode(['ok' => checkWebsiteAvailability($url)]);
