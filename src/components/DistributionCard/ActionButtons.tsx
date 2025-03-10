@@ -65,12 +65,12 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
         >
           {isDisabling || isToggling ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="animate-spin" />
               Выключэнне...
             </>
           ) : (
             <>
-              <PowerOff className="mr-2 h-4 w-4" />
+              <PowerOff />
               Выключыць
             </>
           )}
@@ -86,12 +86,12 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
           >
             {isEnabling || isToggling ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="animate-spin" />
                 Уключэнне...
               </>
             ) : (
               <>
-                <Power className="mr-2 h-4 w-4" />
+                <Power />
                 Уключыць
               </>
             )}
@@ -106,12 +106,12 @@ export function ActionButtons({ distribution }: ActionButtonsProps) {
               >
                 {isDeleting ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    <Loader2 className="animate-spin" />
                     Выдаленне...
                   </>
                 ) : (
                   <>
-                    <Trash2 className="mr-2 h-4 w-4" />
+                    <Trash2 />
                     Выдаліць
                   </>
                 )}

@@ -25,8 +25,8 @@ export function DomainInfo({ distribution }: DomainInfoProps) {
       >
         {distribution.domainName}
       </a>
-      <Button variant="ghost" size="icon" className="ml-1 h-4 w-4 shrink-0 p-0" onClick={handleCopy}>
-        <Copy className="h-3 w-3" />
+      <Button variant="ghost" size="icon" className="ml-1 size-5 shrink-0 p-0" onClick={handleCopy}>
+        <Copy />
       </Button>
     </div>
   );

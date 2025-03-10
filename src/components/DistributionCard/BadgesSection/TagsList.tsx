@@ -19,13 +19,13 @@ const TagBadge = ({ tag, onDelete, disabled, isLoading }: TagBadgeProps) => (
   <Badge variant="outline" className={isLoading ? 'text-muted-foreground' : ''}>
     {tag.value}
     {isLoading ? (
-      <Loader2 className="ml-1 h-3 w-3 animate-spin" />
+      <Loader2 className="animate-spin" />
     ) : (
       onDelete && (
         <Button
           variant="ghost"
           size="icon"
-          className="h-3 w-3 p-0 text-muted-foreground transition-colors hover:bg-transparent hover:text-destructive"
+          className="size-3 p-0 text-muted-foreground transition-colors hover:bg-transparent hover:text-destructive"
           onClick={() => onDelete(tag.value)}
           disabled={disabled}
         >
