@@ -79,7 +79,7 @@ export function CreateDistributionDialog() {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button className="w-full md:w-auto">
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus />
           Стварыць Distribution
         </Button>
       </AlertDialogTrigger>

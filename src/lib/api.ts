@@ -21,6 +21,16 @@ export async function fetchDistributions(): Promise<DistributionsListResponse> {
   return data;
 }
 
+export async function checkAvailability(domain: string): Promise<boolean> {
+  const response = await fetch(process.env.NEXT_PUBLIC_AVAILABILITY_CHECKER, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: `url=${encodeURIComponent(domain)}`,
+  });
+  const data = await response.json();
+  return data.ok;
+}
+
 export async function fetchPolicies(): Promise<PoliciesResponse> {
   const response = await fetch(`${getBaseUrl()}/api/policies`);
   const data = await response.json();

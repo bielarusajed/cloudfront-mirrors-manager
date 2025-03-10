@@ -1,3 +1,4 @@
+import { CheckAllAvailabilityButton } from '@/components/CheckAllAvailabilityButton';
 import { CreateDistributionDialog } from '@/components/CreateDistributionDialog';
 import { DistributionsList } from '@/components/DistributionsList';
 import { Button } from '@/components/ui/button';
@@ -30,13 +31,13 @@ export default async function Home() {
           <h1 className="font-bold text-2xl">CloudFront Manager</h1>
           <div className="flex flex-col gap-4 md:flex-row">
             <CreateDistributionDialog />
+            <CheckAllAvailabilityButton />
             <Button onClick={signOut} variant="outline" className="w-full md:w-auto">
-              <LogOut className="mr-2 h-4 w-4" />
+              <LogOut />
               Выйсці
             </Button>
           </div>
         </div>
-
         <DistributionsList />
       </main>
     </HydrationBoundary>

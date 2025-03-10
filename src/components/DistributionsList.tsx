@@ -3,7 +3,7 @@
 import { DistributionCard } from '@/components/DistributionCard';
 import { fetchDistributions } from '@/lib/api';
 import type { DistributionSummary } from '@/types/distribution';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 

@@ -7,6 +7,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useRef } from 'react';
 import { toast } from 'sonner';
 import { ActionButtons } from './ActionButtons';
+import { AvailabilityChecker } from './AvailabilityChecker';
 import { BadgesSection } from './BadgesSection';
 import { DistributionInfo as DistributionInfoComponent } from './DistributionInfo';
 import { DomainInfo } from './DomainInfo';
@@ -50,6 +51,7 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
       <CardContent className="space-y-1">
         <BadgesSection distribution={distribution} />
         <DomainInfo distribution={distribution} />
+        <AvailabilityChecker domain={distribution.domainName} />
         <DistributionInfoComponent distribution={distribution} />
       </CardContent>
     </Card>
