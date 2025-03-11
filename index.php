@@ -13,7 +13,7 @@ function checkWebsiteAvailability($url) {
     // Правяраем даступнасць
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_NOBODY, true);
+    curl_setopt($ch, CURLOPT_HEADER, true); // Атрымліваем заголовкі
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_TIMEOUT, 5);
     
@@ -22,10 +22,56 @@ function checkWebsiteAvailability($url) {
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36');
     
-    $result = curl_exec($ch);
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+    $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
+    $redirectCount = curl_getinfo($ch, CURLINFO_REDIRECT_COUNT);
+    $finalUrl = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
+    
+    // Раздзяляем заголовкі і цела
+    $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+    $headers = substr($response, 0, $headerSize);
+    
+    // Парсім заголовкі
+    $headerLines = explode("\n", $headers);
+    $parsedHeaders = [];
+    foreach ($headerLines as $line) {
+        if (strpos($line, ':') !== false) {
+            list($key, $value) = explode(':', $line, 2);
+            $parsedHeaders[trim($key)] = trim($value);
+        }
+    }
+    
+    if ($response === false) {
+        $error = curl_error($ch);
+        curl_close($ch);
+        return [
+            'ok' => false,
+            'error' => $error,
+            'debug' => [
+                'url' => $url,
+                'final_url' => $finalUrl,
+                'total_time' => $totalTime,
+                'redirect_count' => $redirectCount
+            ]
+        ];
+    }
+    
     curl_close($ch);
     
-    return $result !== false;
+    return [
+        'ok' => true,
+        'debug' => [
+            'url' => $url,
+            'final_url' => $finalUrl,
+            'status_code' => $httpCode,
+            'content_type' => $contentType,
+            'total_time' => $totalTime,
+            'redirect_count' => $redirectCount,
+            'headers' => $parsedHeaders
+        ]
+    ];
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -36,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     header('Content-Type: application/json');
     $url = $_POST['url'] ?? '';
-    echo json_encode(['ok' => checkWebsiteAvailability($url)]);
+    echo json_encode(checkWebsiteAvailability($url), JSON_PRETTY_PRINT);
     exit;
 }
 ?>
@@ -101,9 +147,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const data = await response.json();
                 
                 if (data.ok) {
-                    resultDiv.innerHTML = '<div class="alert alert-success">Сайт даступны!</div>';
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-success">Сайт даступны!</div>
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Дэталі:</h5>
+                                <pre class="bg-light p-3 rounded"><code>${JSON.stringify(data.debug, null, 2)}</code></pre>
+                            </div>
+                        </div>
+                    `;
                 } else {
-                    resultDiv.innerHTML = '<div class="alert alert-danger">Сайт недаступны!</div>';
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-danger">Сайт недаступны!</div>
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h5 class="card-title">Памылка:</h5>
+                                <pre class="bg-light p-3 rounded"><code>${data.error}</code></pre>
+                                <h5 class="card-title mt-3">Дэталі:</h5>
+                                <pre class="bg-light p-3 rounded"><code>${JSON.stringify(data.debug, null, 2)}</code></pre>
+                            </div>
+                        </div>
+                    `;
                 }
             } catch (error) {
                 resultDiv.innerHTML = '<div class="alert alert-danger">Памылка пры праверцы сайта!</div>';
