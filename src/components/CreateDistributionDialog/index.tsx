@@ -120,7 +120,23 @@ export function CreateDistributionDialog() {
                       min={1}
                       placeholder="1"
                       {...field}
-                      onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 1)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === '') {
+                          field.onChange('');
+                        } else {
+                          const numValue = Number.parseInt(value);
+                          field.onChange(Number.isNaN(numValue) ? '' : numValue);
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const value = e.target.value;
+                        const numValue = Number.parseInt(value);
+                        if (Number.isNaN(numValue) || numValue < 1) {
+                          field.onChange(1);
+                        }
+                        field.onBlur();
+                      }}
                       value={field.value}
                     />
                   </FormControl>
