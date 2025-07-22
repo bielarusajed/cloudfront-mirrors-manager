@@ -16,12 +16,25 @@ interface CreateDistributionParams {
   originDomainName: string;
   cachePolicyId: string;
   originRequestPolicyId: string;
+  count: number;
 }
 
 export async function createDistributionAction(params: CreateDistributionParams) {
   await checkActionAuth();
-  const result = await createDistribution(params);
-  return result;
+
+  const { count, ...distributionParams } = params;
+
+  // Стварэнне distribution'ов паралельна з унікальнымі callerReference
+  const promises = Array.from({ length: count }, () => {
+    const uniqueCallerReference = `${Date.now()}-${crypto.randomUUID()}`;
+    return createDistribution({
+      ...distributionParams,
+      callerReference: uniqueCallerReference,
+    });
+  });
+  const results = await Promise.all(promises);
+
+  return results;
 }
 
 export async function deleteDistributionAction(id: string) {

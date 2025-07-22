@@ -58,6 +58,7 @@ export function CreateDistributionDialog() {
       originDomainName: '',
       cachePolicyId: '',
       originRequestPolicyId: '',
+      count: 1,
     },
   });
 
@@ -65,7 +66,10 @@ export function CreateDistributionDialog() {
     mutationFn: createDistributionAction,
     onSuccess: async (result) => {
       await queryClient.invalidateQueries({ queryKey: ['distributions'] });
-      toast.success('Distribution створаны', { description: `ID: ${result.id}` });
+      const count = form.getValues('count');
+      toast.success(`${count} distribution створаны паспяхова`, {
+        description: `ID: ${result.map((r) => r.id).join(', ')}`,
+      });
       form.reset();
       setOpen(false);
     },
@@ -100,6 +104,27 @@ export function CreateDistributionDialog() {
                     <Input placeholder="origin.example.com" {...field} />
                   </FormControl>
                   <FormDescription>Дамен, з якога будуць загружацца файлы</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="count"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Колькасць distribution</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      min={1}
+                      placeholder="1"
+                      {...field}
+                      onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 1)}
+                      value={field.value}
+                    />
+                  </FormControl>
+                  <FormDescription>Колькасць distribution'ов для стварэння з аднолькавымі настройкамі</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

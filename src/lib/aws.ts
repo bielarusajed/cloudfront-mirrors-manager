@@ -33,11 +33,12 @@ export async function createDistribution({
   cachePolicyId,
   originRequestPolicyId,
   comments,
+  callerReference,
 }: CreateDistributionRequest): Promise<{ id: string }> {
   const cloudfront = await getCloudFrontClient();
   const command = new CreateDistributionCommand({
     DistributionConfig: {
-      CallerReference: Date.now().toString(),
+      CallerReference: callerReference || Date.now().toString(),
       Enabled: true,
       Comment: comments || '',
       Origins: {

@@ -21,6 +21,7 @@ export type CreateDistributionRequest = {
   cachePolicyId: string;
   originRequestPolicyId: string;
   comments?: string;
+  callerReference?: string;
 };
 
 export type CreateDistributionResponse = {
