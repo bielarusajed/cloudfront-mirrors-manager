@@ -1,5 +1,6 @@
 'use client';
 
+import { BulkActionsBar } from '@/components/BulkActionsBar';
 import { DistributionCard } from '@/components/DistributionCard';
 import { fetchDistributions } from '@/lib/api';
 import type { DistributionSummary } from '@/types/distribution';
@@ -45,10 +46,13 @@ export function DistributionsList() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {distributions.map((distribution: DistributionSummary) => (
-        <DistributionCard key={distribution.id} distribution={distribution} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {distributions.map((distribution: DistributionSummary) => (
+          <DistributionCard key={distribution.id} distribution={distribution} />
+        ))}
+      </div>
+      <BulkActionsBar />
+    </>
   );
 }

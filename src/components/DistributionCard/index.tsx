@@ -1,9 +1,12 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { fetchDistributionStatus } from '@/lib/api';
+import { selectedDistributionsAtom, toggleDistributionSelectionAtom } from '@/lib/atoms';
 import type { DistributionStatus, DistributionSummary } from '@/types/distribution';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useAtom, useAtomValue } from 'jotai';
 import { useRef } from 'react';
 import { toast } from 'sonner';
 import { ActionButtons } from './ActionButtons';
@@ -19,6 +22,10 @@ type DistributionCardProps = {
 export function DistributionCard({ distribution }: DistributionCardProps) {
   const previousStatusRef = useRef<DistributionStatus | undefined>(undefined);
   const queryClient = useQueryClient();
+
+  const selectedDistributions = useAtomValue(selectedDistributionsAtom);
+  const isSelected = selectedDistributions.has(distribution.id);
+  const [, toggleSelection] = useAtom(toggleDistributionSelectionAtom);
 
   const handleStatusChange = async (status: DistributionStatus) => {
     await queryClient.invalidateQueries({ queryKey: ['distributions'] });
@@ -41,10 +48,17 @@ export function DistributionCard({ distribution }: DistributionCardProps) {
   });
 
   return (
-    <Card className="gap-2.5">
+    <Card className={`gap-2.5 transition-colors ${isSelected ? 'ring-2 ring-primary' : ''}`}>
       <CardHeader>
         <div className="flex w-full items-center justify-between">
-          <CardTitle className="text-muted-foreground text-sm">ID: {distribution.id}</CardTitle>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={() => toggleSelection(distribution.id)}
+              aria-label={`Выбраць distribution ${distribution.id}`}
+            />
+            <CardTitle className="text-muted-foreground text-sm">ID: {distribution.id}</CardTitle>
+          </div>
           <ActionButtons distribution={distribution} />
         </div>
       </CardHeader>
