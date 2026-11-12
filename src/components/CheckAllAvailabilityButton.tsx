@@ -1,35 +1,62 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { checkAvailability, fetchDistributions } from '@/lib/api';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Wifi } from 'lucide-react';
+import { checkAvailability } from '@/lib/api';
+import type { DistributionSummary } from '@/types/distribution';
+import { useQueryClient } from '@tanstack/react-query';
+import { LoaderCircle, RefreshCw } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
-export function CheckAllAvailabilityButton() {
-  const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
-    queryKey: ['distributions'],
-    queryFn: fetchDistributions,
-  });
-
-  const handleCheckAll = async () => {
-    const distributions = data?.items ?? [];
-    for (const distribution of distributions)
-      await queryClient.fetchQuery({
-        queryKey: ['availability', distribution.domainName],
-        queryFn: () => checkAvailability(distribution.domainName),
-      });
-  };
-
+export function CheckAllAvailabilityButton({ distributions }: { distributions: DistributionSummary[] }) {
+  const client = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  async function checkAll() {
+    setBusy(true);
+    const remaining = [...new Set(distributions.map((d) => d.domainName).filter(Boolean))];
+    let available = 0;
+    let unavailable = 0;
+    let failed = 0;
+    async function worker() {
+      let domain = remaining.shift();
+      while (domain) {
+        const current = domain;
+        try {
+          if (
+            await client.fetchQuery({
+              queryKey: ['availability', current],
+              queryFn: () => checkAvailability(current),
+              retry: false,
+              staleTime: 0,
+            })
+          )
+            available++;
+          else unavailable++;
+        } catch {
+          failed++;
+        }
+        domain = remaining.shift();
+      }
+    }
+    try {
+      await Promise.all(Array.from({ length: Math.min(4, remaining.length) }, worker));
+      if (failed)
+        toast.error(`Не ўдалося праверыць URL: ${failed}`, {
+          description: `Даступныя: ${available}; недаступныя: ${unavailable}.`,
+        });
+      else toast.success(`Праверка завершана: даступныя ${available}, недаступныя ${unavailable}.`);
+    } finally {
+      setBusy(false);
+    }
+  }
   return (
-    <Button
-      variant="outline"
-      onClick={handleCheckAll}
-      disabled={isLoading || !data?.items?.length}
-      className="w-full md:w-auto"
+    <button
+      type="button"
+      className="mirror-button mirror-check-all"
+      onClick={checkAll}
+      disabled={busy || !distributions.some((d) => d.domainName)}
     >
-      <Wifi />
-      Праверыць даступнасць усіх Distribution
-    </Button>
+      {busy ? <LoaderCircle size={14} className="mirror-spinner" /> : <RefreshCw size={14} />}
+      {busy ? 'Праверка URL…' : 'Праверыць усе URL'}
+    </button>
   );
 }

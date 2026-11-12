@@ -1,67 +1,52 @@
-import { Button } from '@/components/ui/button';
+'use client';
+
 import { checkAvailability } from '@/lib/api';
 import { useQuery } from '@tanstack/react-query';
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
-import { useEffect } from 'react';
+import { LoaderCircle, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
-type AvailabilityCheckerProps = {
-  domain: string;
-};
-
-export function AvailabilityChecker({ domain }: AvailabilityCheckerProps) {
-  const { refetch, isLoading, data, error } = useQuery({
+export function AvailabilityChecker({ domain }: { domain: string }) {
+  const query = useQuery({
     queryKey: ['availability', domain],
     queryFn: () => checkAvailability(domain),
     enabled: false,
+    retry: false,
   });
-
-  useEffect(() => {
-    if (error)
-      toast.error('Не атрымалася праверыць даступнасць', {
-        description: error instanceof Error ? error.message : undefined,
-      });
-  }, [error]);
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center text-sm">
-        <span className="text-muted-foreground">Даступнасць:&nbsp;</span>
-        <div className="flex items-center gap-1 text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" />
-          Праверка...
-        </div>
-      </div>
-    );
-  }
-
-  if (data === undefined) {
-    return (
-      <div className="text-sm">
-        <span className="text-muted-foreground">Даступнасць:&nbsp;</span>
-        <Button variant="link" onClick={() => refetch()} className="h-auto p-0">
-          Праверыць
-        </Button>
-      </div>
-    );
-  }
-
+  const status = query.isFetching
+    ? 'checking'
+    : query.isError
+      ? 'error'
+      : query.data === true
+        ? 'available'
+        : query.data === false
+          ? 'unavailable'
+          : 'unchecked';
+  const labels = {
+    checking: 'Праверка…',
+    error: 'Памылка праверкі',
+    available: 'Даступнае',
+    unavailable: 'Недаступнае',
+    unchecked: 'Не праверана',
+  };
   return (
-    <div className="flex items-center text-sm">
-      <span className="text-muted-foreground">Даступнасць:&nbsp;</span>
-      <div className="flex items-center gap-1">
-        {data ? (
-          <>
-            <CheckCircle2 className="size-4 text-green-500" />
-            <span className="text-green-500">Даступны</span>
-          </>
-        ) : (
-          <>
-            <XCircle className="size-4 text-red-500" />
-            <span className="text-red-500">Недаступны</span>
-          </>
-        )}
-      </div>
+    <div className="mirror-availability">
+      <span className={`mirror-check-result is-${status}`} aria-live="polite">
+        <i aria-hidden />
+        {labels[status]}
+      </span>
+      <button
+        type="button"
+        className="mirror-check"
+        disabled={query.isFetching || !domain}
+        aria-label={`Праверыць URL ${domain}`}
+        onClick={async () => {
+          const result = await query.refetch();
+          if (result.error) toast.error('Не атрымалася праверыць URL', { description: result.error.message });
+        }}
+      >
+        {query.isFetching ? <LoaderCircle size={12} className="mirror-spinner" /> : <RefreshCw size={12} />}
+        {status === 'unchecked' ? 'Праверыць URL' : 'Яшчэ раз'}
+      </button>
     </div>
   );
 }

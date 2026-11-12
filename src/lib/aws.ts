@@ -1,4 +1,4 @@
-import type { CreateDistributionRequest, DistributionStatus } from '@/types/distribution';
+import type { CreateDistributionRequest, DistributionStatus, DistributionSummary } from '@/types/distribution';
 import {
   type DistributionSummary as AWSDistributionSummary,
   type CachePolicySummary,
@@ -34,7 +34,7 @@ export async function createDistribution({
   originRequestPolicyId,
   comments,
   callerReference,
-}: CreateDistributionRequest): Promise<{ id: string }> {
+}: CreateDistributionRequest): Promise<DistributionSummary> {
   const cloudfront = await getCloudFrontClient();
   const command = new CreateDistributionCommand({
     DistributionConfig: {
@@ -85,14 +85,27 @@ export async function createDistribution({
 
   return {
     id: response.Distribution.Id,
+    domainName: response.Distribution.DomainName || '',
+    status: (response.Distribution.Status || 'InProgress') as DistributionStatus,
+    enabled: true,
+    origins: [{ domainName: originDomainName }],
+    lastModifiedTime: response.Distribution.LastModifiedTime,
+    cachePolicyId,
+    originRequestPolicyId,
+    comments: comments || '',
   };
 }
 
 export async function listDistributions(): Promise<AWSDistributionSummary[]> {
   const cloudfront = await getCloudFrontClient();
-  const command = new ListDistributionsCommand({});
-  const response = await cloudfront.send(command);
-  return response.DistributionList?.Items || [];
+  const items: AWSDistributionSummary[] = [];
+  let marker: string | undefined;
+  do {
+    const response = await cloudfront.send(new ListDistributionsCommand({ Marker: marker }));
+    items.push(...(response.DistributionList?.Items ?? []));
+    marker = response.DistributionList?.IsTruncated ? response.DistributionList.NextMarker : undefined;
+  } while (marker);
+  return items;
 }
 
 export async function getDistributionETag(id: string): Promise<string> {
@@ -128,20 +141,14 @@ export async function disableDistribution(id: string): Promise<void> {
 }
 
 export async function deleteDistribution(id: string): Promise<void> {
-  await disableDistribution(id);
-
-  // Чакаем, пакуль distribution будзе выключаны
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-
-  const etag = await getDistributionETag(id);
-  if (!etag) throw new Error('Не атрымалася атрымаць версію distribution');
-
   const cloudfront = await getCloudFrontClient();
-  const command = new DeleteDistributionCommand({
-    Id: id,
-    IfMatch: etag,
-  });
-  await cloudfront.send(command);
+  const current = await cloudfront.send(new GetDistributionCommand({ Id: id }));
+  if (!current.ETag || !current.Distribution?.DistributionConfig)
+    throw new Error('Не атрымалася атрымаць канфігурацыю люстэрка');
+  if (current.Distribution.DistributionConfig.Enabled || current.Distribution.Status !== 'Deployed') {
+    throw new Error('Спачатку выключыце люстэрка і дачакайцеся завяршэння абнаўлення');
+  }
+  await cloudfront.send(new DeleteDistributionCommand({ Id: id, IfMatch: current.ETag }));
 }
 
 export async function enableDistribution(id: string): Promise<void> {

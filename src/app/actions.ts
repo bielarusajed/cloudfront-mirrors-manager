@@ -9,6 +9,7 @@ import {
   enableDistribution,
   updateDistributionComments,
 } from '@/lib/aws';
+import { createDistributionBatch } from '@/lib/create-distribution-batch';
 
 export { authAction as authenticate, signOutAction as signOut };
 
@@ -22,19 +23,7 @@ interface CreateDistributionParams {
 export async function createDistributionAction(params: CreateDistributionParams) {
   await checkActionAuth();
 
-  const { count, ...distributionParams } = params;
-
-  // Стварэнне distribution'ов паралельна з унікальнымі callerReference
-  const promises = Array.from({ length: count }, () => {
-    const uniqueCallerReference = `${Date.now()}-${crypto.randomUUID()}`;
-    return createDistribution({
-      ...distributionParams,
-      callerReference: uniqueCallerReference,
-    });
-  });
-  const results = await Promise.all(promises);
-
-  return results;
+  return createDistributionBatch(params, createDistribution);
 }
 
 export async function deleteDistributionAction(id: string) {

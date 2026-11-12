@@ -4,8 +4,8 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: 'CloudFront Manager',
-  description: 'Кіраванне CloudFront distributions',
+  title: 'Люстэркі CloudFront',
+  description: 'Стварэнне і кіраванне люстэркамі CloudFront',
 };
 
 export default function RootLayout({
@@ -18,7 +18,7 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
-          <Toaster />
+          <Toaster position="top-right" visibleToasts={1} />
         </Providers>
       </body>
     </html>
