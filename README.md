@@ -4,6 +4,8 @@
 
 ## Запуск
 
+Патрэбны Node.js 20.9 або навейшы.
+
 ```sh
 npm ci
 npm run dev
