@@ -2,6 +2,7 @@
 
 import { WorkspaceDialog } from '@/components/WorkspaceDialog';
 import { fetchPolicies, removeDistribution, setDistributionEnabled, updateComments } from '@/lib/api';
+import { formatDateTime } from '@/lib/dates';
 import type { DistributionSummary } from '@/types/distribution';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
@@ -81,13 +82,7 @@ export function MirrorDetailsDialog({
           </div>
           <div>
             <dt>Апошняе абнаўленне</dt>
-            <dd>
-              {distribution.lastModifiedTime
-                ? new Intl.DateTimeFormat('be-BY', { dateStyle: 'medium', timeStyle: 'short' }).format(
-                    new Date(distribution.lastModifiedTime),
-                  )
-                : 'Няма даных'}
-            </dd>
+            <dd>{formatDateTime(distribution.lastModifiedTime)}</dd>
           </div>
           <div>
             <dt>Палітыка кэшавання</dt>
@@ -104,7 +99,7 @@ export function MirrorDetailsDialog({
             save.mutate();
           }}
         >
-          <label>
+          <label className="app-field">
             Нататкі / тэгі
             <textarea
               value={note}

@@ -1,4 +1,5 @@
 import type { DistributionSummary } from '../types/distribution';
+import { calendarDayKey, formatDate } from './dates.ts';
 
 export type DistributionGroup = { key: string; label: string; items: DistributionSummary[] };
 
@@ -9,12 +10,10 @@ export function modifiedTime(item: DistributionSummary): number {
 }
 
 export function groupDistributions(items: DistributionSummary[], now: number, timeZone = 'UTC'): DistributionGroup[] {
-  const day = new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' });
-  const dayKey = (time: number) => day.format(time);
+  const dayKey = (time: number) => calendarDayKey(time, timeZone);
   const today = dayKey(now);
   const [year, month, date] = today.split('-').map(Number);
   const yesterday = new Date(Date.UTC(year, month - 1, date - 1)).toISOString().slice(0, 10);
-  const labelDate = new Intl.DateTimeFormat('be-BY', { timeZone, year: 'numeric', month: 'long', day: 'numeric' });
   const groups = new Map<string, DistributionGroup>();
   for (const item of [...items].sort((a, b) => modifiedTime(b) - modifiedTime(a) || a.id.localeCompare(b.id))) {
     const time = modifiedTime(item);
@@ -28,7 +27,7 @@ export function groupDistributions(items: DistributionSummary[], now: number, ti
             ? 'Сёння'
             : key === yesterday
               ? 'Учора'
-              : labelDate.format(time);
+              : formatDate(time, timeZone);
     const group = groups.get(key);
     if (group) group.items.push(item);
     else groups.set(key, { key, label, items: [item] });

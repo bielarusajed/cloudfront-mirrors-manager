@@ -42,7 +42,7 @@ export function CreateDistributionDialog({
         }}
       >
         <fieldset disabled={mutation.isPending}>
-          <label>
+          <label className="app-field">
             Дамен крыніцы
             <input
               name="originDomainName"
@@ -53,11 +53,11 @@ export function CreateDistributionDialog({
               title="Увядзіце дамен без https:// і шляху"
             />
           </label>
-          <label>
+          <label className="app-field">
             Колькасць люстэркаў
             <input type="number" name="count" required min={1} max={100} step={1} defaultValue={10} />
           </label>
-          <label>
+          <label className="app-field">
             Палітыка кэшавання
             <select
               name="cachePolicyId"
@@ -77,7 +77,7 @@ export function CreateDistributionDialog({
             </select>
             <small>Выберыце, як захоўваць адказы ў кэшы.</small>
           </label>
-          <label>
+          <label className="app-field">
             Палітыка запытаў да крыніцы
             <select
               name="originRequestPolicyId"

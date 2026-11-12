@@ -1,12 +1,4 @@
 .mirrors-workspace {
-  --mirror-bg: #eceef1;
-  --mirror-paper: #ffffff;
-  --mirror-line: #d3d7dd;
-  --mirror-ink: #121417;
-  --mirror-muted: #69707a;
-  --mirror-soft: #a3a9b1;
-  --mirror-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Menlo, Consolas, monospace;
-
   min-height: 100vh;
   padding: 0 clamp(12px, 3vw, 32px) calc(112px + env(safe-area-inset-bottom, 0px));
   background: var(--mirror-bg);
@@ -48,27 +40,6 @@
   flex-wrap: wrap;
   gap: 6px;
   margin-left: auto;
-}
-.mirror-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 36px;
-  padding: 0 12px;
-  border: 1px solid var(--mirror-line);
-  border-radius: 6px;
-  background: var(--mirror-paper);
-  color: var(--mirror-ink);
-  font-weight: 550;
-  white-space: nowrap;
-}
-.mirror-button:hover {
-  border-color: var(--mirror-ink);
-}
-.mirror-button-primary {
-  background: var(--mirror-ink);
-  border-color: var(--mirror-ink);
-  color: #fff;
 }
 .mirror-empty {
   padding: 48px 0;
@@ -167,24 +138,6 @@
   align-items: flex-start;
   padding: 4px;
 }
-.mirror-icon {
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 5px;
-  background: transparent;
-  color: var(--mirror-muted);
-}
-.mirror-icon:hover {
-  background: var(--mirror-bg);
-  color: var(--mirror-ink);
-}
-.mirrors-workspace :focus-visible {
-  outline: 2px solid var(--mirror-ink);
-  outline-offset: 2px;
-}
 @media (max-width: 520px) {
   .mirror-tools {
     flex-direction: column;
@@ -251,23 +204,6 @@
   }
 }
 
-.mirrors-workspace {
-  font: 14px / 1.4 "Segoe UI", Arial, sans-serif;
-  color-scheme: light;
-}
-.mirrors-workspace *,
-.mirror-dialog * {
-  box-sizing: border-box;
-}
-.mirrors-workspace button,
-.mirror-dialog button {
-  cursor: pointer;
-}
-.mirrors-workspace button:disabled,
-.mirror-dialog button:disabled {
-  opacity: 0.55;
-  cursor: default;
-}
 .mirrors-heading {
   display: flex;
   align-items: center;
@@ -277,9 +213,6 @@
 .mirror-signout {
   flex-shrink: 0;
 }
-.mirror-button {
-  justify-content: center;
-}
 .mirror-availability {
   display: flex;
   flex-basis: 100%;
@@ -288,7 +221,7 @@
   justify-content: space-between;
   gap: 8px;
   padding: 6px 12px 8px;
-  border-top: 1px solid #e9ecf0;
+  border-top: 1px solid var(--mirror-faint-line);
   font-size: 11px;
 }
 .mirror-card {
@@ -298,7 +231,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #7c889a;
+  color: var(--mirror-muted);
 }
 .mirror-check-result i {
   width: 5px;
@@ -321,7 +254,7 @@
   gap: 5px;
   padding: 3px 0;
   font-size: 10px;
-  color: #62748b;
+  color: var(--mirror-muted);
 }
 .mirror-spinner {
   animation: mirror-spin 1s linear infinite;
@@ -331,12 +264,12 @@
   align-items: center;
   gap: 10px;
   padding: 40px 0;
-  color: #69707a;
+  color: var(--mirror-muted);
 }
 .mirror-list-error {
   padding: 16px 0;
   font-size: 13px;
-  color: #a13f31;
+  color: var(--mirror-danger);
 }
 .mirror-list-error button {
   text-decoration: underline;
@@ -349,16 +282,16 @@
   max-width: calc(100vw - 28px);
   max-height: calc(100dvh - 32px);
   overflow: auto;
-  border: 1px solid #d3d7dd;
-  border-radius: 10px;
+  border: 1px solid var(--mirror-line);
+  border-radius: 6px;
   padding: 0;
-  background: #fff;
-  color: #273144;
+  background: var(--mirror-paper);
+  color: var(--mirror-ink);
   box-shadow: 0 12px 70px #0004;
-  font: 13px / 1.5 "Segoe UI", Arial, sans-serif;
+  font: 14px / 1.4 var(--mirror-font);
 }
 .mirror-dialog::backdrop {
-  background: #13203499;
+  background: #12141766;
 }
 .mirror-dialog-heading {
   display: flex;
@@ -366,7 +299,7 @@
   justify-content: space-between;
   gap: 15px;
   padding: 22px 24px;
-  border-bottom: 1px solid #e1e5eb;
+  border-bottom: 1px solid var(--mirror-line);
 }
 .mirror-dialog-heading h2 {
   font-size: 20px;
@@ -378,7 +311,7 @@
   display: grid;
   place-items: center;
   padding: 6px;
-  color: #788697;
+  color: var(--mirror-muted);
 }
 .mirror-form,
 .mirror-details,
@@ -391,55 +324,6 @@
   margin: 0;
   min-width: 0;
 }
-.mirror-dialog label {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  margin-bottom: 18px;
-  font-size: 12px;
-  color: #465b74;
-}
-.mirror-dialog label small,
-.mirror-help {
-  color: #8290a3;
-  font-size: 11px;
-}
-.mirror-dialog input,
-.mirror-dialog select,
-.mirror-dialog textarea {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  background: #f9fbfe;
-  color: #283e59;
-  border: 1px solid #cfd9e6;
-  border-radius: 4px;
-  padding: 10px 11px;
-  font: 12px / 1.5 "Segoe UI", Arial, sans-serif;
-}
-.mirror-dialog input:focus,
-.mirror-dialog select:focus,
-.mirror-dialog textarea:focus {
-  outline: 2px solid #9db0c6;
-  outline-offset: 1px;
-}
-.mirror-dialog .mirror-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 40px;
-  padding: 8px 12px;
-  border: 1px solid #d3d7dd;
-  border-radius: 6px;
-  font-size: 12px;
-  color: #273144;
-  background: #fff;
-}
-.mirror-dialog .mirror-button-primary {
-  color: #fff;
-  background: #121417;
-  border-color: #121417;
-}
 .mirror-dialog-actions,
 .mirror-detail-actions {
   display: flex;
@@ -448,19 +332,8 @@
   justify-content: space-between;
   gap: 12px;
   margin-top: 22px;
-  border-top: 1px solid #e1e5eb;
+  border-top: 1px solid var(--mirror-line);
   padding-top: 18px;
-}
-.mirror-error {
-  padding: 10px 12px;
-  background: #fff3ef;
-  border: 1px solid #f3d0c6;
-  color: #9e3e2e;
-  border-radius: 4px;
-  font-size: 12px;
-}
-.mirror-error button {
-  text-decoration: underline;
 }
 .mirror-full-url {
   display: flex;
@@ -472,7 +345,7 @@
 .mirror-full-url a {
   flex: 1;
   overflow-wrap: anywhere;
-  color: #354b6c;
+  color: var(--mirror-ink);
   font: 12px / 1.6 Consolas, monospace;
 }
 .mirror-details dl {
@@ -486,21 +359,17 @@
   font-size: 12px;
 }
 .mirror-details dt {
-  color: #7b899b;
+  color: var(--mirror-muted);
 }
 .mirror-details dd {
   margin: 0;
   overflow-wrap: anywhere;
 }
-.mirror-danger {
-  color: #ad3e2d !important;
-  border-color: #e6b5a9 !important;
-}
 .mirror-delete-confirm {
   margin-top: 20px;
   padding: 15px;
-  background: #fff5f1;
-  border: 1px solid #efd1c7;
+  background: var(--mirror-error-bg);
+  border: 1px solid var(--mirror-danger-line);
   border-radius: 6px;
 }
 .mirror-delete-confirm p {
@@ -519,10 +388,6 @@
 .mirror-manual-copy textarea {
   margin-bottom: 15px;
   font-family: Consolas, monospace;
-}
-.mirror-dialog :focus-visible {
-  outline: 2px solid #354b6c;
-  outline-offset: 3px;
 }
 @keyframes mirror-spin {
   to {

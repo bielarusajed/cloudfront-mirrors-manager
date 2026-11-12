@@ -38,6 +38,20 @@ test('five-minute boundary is inclusive for the older daily group', () => {
   );
 });
 
+test('older dates stay Belarusian when the device has no Belarusian month names', (context) => {
+  const OriginalDateTimeFormat = Intl.DateTimeFormat;
+  context.mock.method(
+    Intl,
+    'DateTimeFormat',
+    function MissingBelarusianDateTimeFormat(locales: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions) {
+      const formatter = new OriginalDateTimeFormat(locales, options);
+      if (String(locales).startsWith('be')) Object.defineProperty(formatter, 'format', { value: () => '2026 M11 6' });
+      return formatter;
+    },
+  );
+  assert.equal(groupDistributions([item('older', '2026-11-06T12:00:00Z')], now)[0].label, '6 лістапада 2026');
+});
+
 test('missing and malformed update dates are unknown, not invented dates', () => {
   const groups = groupDistributions(
     [item('missing'), item('bad', 'invalid'), item('known', '2026-11-12T11:59:00Z')],
