@@ -1,239 +1,130 @@
 'use client';
 
-import { createDistributionAction } from '@/app/actions';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { fetchPolicies } from '@/lib/api';
-import type { CachePolicySummary, OriginRequestPolicySummary } from '@aws-sdk/client-cloudfront';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Loader2, Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { type FormValues, formSchema } from './schema';
+import { WorkspaceDialog } from '@/components/WorkspaceDialog';
+import { createDistributions, fetchPolicies } from '@/lib/api';
+import type { CreateDistributionBatchResponse } from '@/types/distribution';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 
-type Policies = {
-  cachePolicies: CachePolicySummary[];
-  originRequestPolicies: OriginRequestPolicySummary[];
-};
-
-export function CreateDistributionDialog() {
-  const [open, setOpen] = useState(false);
-
-  const queryClient = useQueryClient();
-
-  const { data, error } = useQuery<Policies>({
-    queryKey: ['policies'],
-    queryFn: fetchPolicies,
-    retry: 3,
-  });
-
-  useEffect(() => {
-    if (error)
-      toast.error('Не атрымалася загрузіць палітыкі', {
-        description: error instanceof Error ? error.message : undefined,
-      });
-  }, [error]);
-
-  const cachePolicies = data?.cachePolicies ?? [];
-  const originRequestPolicies = data?.originRequestPolicies ?? [];
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      originDomainName: '',
-      cachePolicyId: '',
-      originRequestPolicyId: '',
-      count: 1,
+export function CreateDistributionDialog({
+  onClose,
+  onCreated,
+}: { onClose: () => void; onCreated: (result: CreateDistributionBatchResponse) => void }) {
+  const policies = useQuery({ queryKey: ['policies'], queryFn: fetchPolicies });
+  const [error, setError] = useState('');
+  const mutation = useMutation({
+    mutationFn: createDistributions,
+    onSuccess: (result) => {
+      if (result.items.length) {
+        onCreated(result);
+        onClose();
+      } else setError(result.errors[0]?.message || 'Не атрымалася стварыць люстэркі');
     },
+    onError: (error) => setError(error.message),
   });
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: createDistributionAction,
-    onSuccess: async (result) => {
-      await queryClient.invalidateQueries({ queryKey: ['distributions'] });
-      const count = form.getValues('count');
-      toast.success(`${count} distribution створаны паспяхова`, {
-        description: `ID: ${result.map((r) => r.id).join(', ')}`,
-      });
-      form.reset();
-      setOpen(false);
-    },
-    onError: (error) =>
-      toast.error('Не атрымалася стварыць distribution', {
-        description: error instanceof Error ? error.message : undefined,
-      }),
-  });
-
+  const caches = policies.data?.cachePolicies.filter((p) => p.CachePolicy?.Id) ?? [];
+  const requests = policies.data?.originRequestPolicies.filter((p) => p.OriginRequestPolicy?.Id) ?? [];
+  const noPolicies = !caches.length || !requests.length;
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <Button className="w-full md:w-auto">
-          <Plus />
-          Стварыць Distribution
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Стварыць Distribution</AlertDialogTitle>
-          <AlertDialogDescription>Запоўніце форму для стварэння новага CloudFront distribution.</AlertDialogDescription>
-        </AlertDialogHeader>
-        <Form {...form}>
-          <div className="space-y-4">
-            <FormField
-              control={form.control}
+    <WorkspaceDialog title="Стварыць люстэркі" onClose={onClose} busy={mutation.isPending}>
+      <form
+        className="mirror-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          setError('');
+          const data = new FormData(event.currentTarget);
+          mutation.mutate({
+            originDomainName: String(data.get('originDomainName')).trim(),
+            count: Number(data.get('count')),
+            cachePolicyId: String(data.get('cachePolicyId')),
+            originRequestPolicyId: String(data.get('originRequestPolicyId')),
+          });
+        }}
+      >
+        <fieldset disabled={mutation.isPending}>
+          <label>
+            Дамен крыніцы
+            <input
               name="originDomainName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Дамен крыніцы</FormLabel>
-                  <FormControl>
-                    <Input placeholder="origin.example.com" {...field} />
-                  </FormControl>
-                  <FormDescription>Дамен, з якога будуць загружацца файлы</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+              required
+              maxLength={253}
+              placeholder="news.example.org"
+              pattern="[a-zA-Z0-9][a-zA-Z0-9.\-]*\.[a-zA-Z]{2,}"
+              title="Увядзіце дамен без https:// і шляху"
             />
-            <FormField
-              control={form.control}
-              name="count"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Колькасць distribution</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      min={1}
-                      placeholder="1"
-                      {...field}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        if (value === '') {
-                          field.onChange('');
-                        } else {
-                          const numValue = Number.parseInt(value);
-                          field.onChange(Number.isNaN(numValue) ? '' : numValue);
-                        }
-                      }}
-                      onBlur={(e) => {
-                        const value = e.target.value;
-                        const numValue = Number.parseInt(value);
-                        if (Number.isNaN(numValue) || numValue < 1) {
-                          field.onChange(1);
-                        }
-                        field.onBlur();
-                      }}
-                      value={field.value}
-                    />
-                  </FormControl>
-                  <FormDescription>Колькасць distribution'ов для стварэння з аднолькавымі настройкамі</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
+          </label>
+          <label>
+            Колькасць люстэркаў
+            <input type="number" name="count" required min={1} max={100} step={1} defaultValue={10} />
+          </label>
+          <label>
+            Палітыка кэшавання
+            <select
               name="cachePolicyId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Палітыка кэшавання</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Выберыце палітыку кэшавання">
-                          {field.value
-                            ? cachePolicies.find((p) => p.CachePolicy?.Id === field.value)?.CachePolicy
-                                ?.CachePolicyConfig?.Name
-                            : null}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {cachePolicies.map((policy) => (
-                        <SelectItem key={policy.CachePolicy?.Id} value={policy.CachePolicy?.Id || ''}>
-                          <div className="flex flex-col gap-1">
-                            <div>{policy.CachePolicy?.CachePolicyConfig?.Name}</div>
-                            <div className="text-muted-foreground text-xs">
-                              {policy.CachePolicy?.CachePolicyConfig?.Comment}
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Выберыце палітыку кэшавання для distribution</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
+              aria-label="Палітыка кэшавання"
+              required
+              defaultValue=""
+              disabled={noPolicies || policies.isPending}
+            >
+              <option value="" disabled>
+                Выберыце палітыку кэшавання
+              </option>
+              {caches.map(({ CachePolicy: p }) => (
+                <option key={p?.Id} value={p?.Id}>
+                  {p?.CachePolicyConfig?.Name || p?.Id}
+                </option>
+              ))}
+            </select>
+            <small>Выберыце, як захоўваць адказы ў кэшы.</small>
+          </label>
+          <label>
+            Палітыка запытаў да крыніцы
+            <select
               name="originRequestPolicyId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Палітыка запытаў да крыніцы</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Выберыце палітыку запытаў">
-                          {field.value
-                            ? originRequestPolicies.find((p) => p.OriginRequestPolicy?.Id === field.value)
-                                ?.OriginRequestPolicy?.OriginRequestPolicyConfig?.Name
-                            : null}
-                        </SelectValue>
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {originRequestPolicies.map((policy) => (
-                        <SelectItem key={policy.OriginRequestPolicy?.Id} value={policy.OriginRequestPolicy?.Id || ''}>
-                          <div className="flex flex-col gap-1">
-                            <div>{policy.OriginRequestPolicy?.OriginRequestPolicyConfig?.Name}</div>
-                            <div className="text-muted-foreground text-xs">
-                              {policy.OriginRequestPolicy?.OriginRequestPolicyConfig?.Comment}
-                            </div>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Выберыце палітыку запытаў да крыніцы</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isPending}>Адмена</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={form.handleSubmit((values: FormValues) => mutate(values))}
-                disabled={isPending}
-              >
-                {isPending ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Стварэнне...
-                  </>
-                ) : (
-                  'Стварыць'
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
+              aria-label="Палітыка запытаў да крыніцы"
+              required
+              defaultValue=""
+              disabled={noPolicies || policies.isPending}
+            >
+              <option value="" disabled>
+                Выберыце палітыку запытаў
+              </option>
+              {requests.map(({ OriginRequestPolicy: p }) => (
+                <option key={p?.Id} value={p?.Id}>
+                  {p?.OriginRequestPolicyConfig?.Name || p?.Id}
+                </option>
+              ))}
+            </select>
+            <small>Выберыце, якія даныя перадаваць крыніцы.</small>
+          </label>
+        </fieldset>
+        {policies.isPending && <output>Загрузка палітык…</output>}
+        {(policies.error || (!policies.isPending && noPolicies)) && (
+          <div className="mirror-error" role="alert">
+            Не атрымалася загрузіць палітыкі.{' '}
+            <button type="button" onClick={() => policies.refetch()}>
+              Паўтарыць
+            </button>
           </div>
-        </Form>
-      </AlertDialogContent>
-    </AlertDialog>
+        )}
+        {error && (
+          <p className="mirror-error" role="alert">
+            {error}
+          </p>
+        )}
+        <footer className="mirror-dialog-actions">
+          <button type="button" className="mirror-button" disabled={mutation.isPending} onClick={onClose}>
+            Адмена
+          </button>
+          <button
+            type="submit"
+            className="mirror-button mirror-button-primary"
+            disabled={mutation.isPending || policies.isPending || noPolicies}
+          >
+            {mutation.isPending ? 'Стварэнне…' : 'Стварыць'}
+          </button>
+        </footer>
+      </form>
+    </WorkspaceDialog>
   );
 }

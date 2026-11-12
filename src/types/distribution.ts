@@ -9,7 +9,9 @@ export type DistributionSummary = {
   status: DistributionStatus;
   enabled: boolean;
   domainName: string;
-  lastModifiedTime?: Date;
+  lastModifiedTime?: Date | string;
+  cachePolicyId?: string;
+  originRequestPolicyId?: string;
   origins: DistributionOrigin[];
   comments?: string;
 };
@@ -38,4 +40,9 @@ export type DeleteDistributionResponse = {
 
 export type DistributionsListResponse = {
   items: DistributionSummary[];
+};
+
+export type CreateDistributionBatchResponse = {
+  items: DistributionSummary[];
+  errors: { index: number; message: string }[];
 };

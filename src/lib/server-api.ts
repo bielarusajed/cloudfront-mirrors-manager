@@ -21,6 +21,8 @@ export async function getDistributions(): Promise<DistributionsListResponse> {
           domainName: origin.DomainName || '',
         })) || [],
       comments: item.Comment || undefined,
+      cachePolicyId: item.DefaultCacheBehavior?.CachePolicyId,
+      originRequestPolicyId: item.DefaultCacheBehavior?.OriginRequestPolicyId,
     })),
   };
 }

@@ -9,6 +9,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   try {
     const { id } = await params;
     const { comments } = await request.json();
+    if (typeof comments !== 'string' || comments.length > 128)
+      return NextResponse.json({ error: 'Нататка павінна змяшчаць не больш за 128 знакаў' }, { status: 400 });
     await updateDistributionComments(id, comments);
     return new NextResponse(null, { status: 204 });
   } catch (error) {

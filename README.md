@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Люстэркі CloudFront
 
-## Getting Started
+Кампактныя карткі для стварэння, праверкі і кіравання люстэркамі CloudFront. Асноўны сцэнар: стварыць каля дзесяці люстэркаў з аднолькавымі палітыкамі, выбраць іх і скапіяваць поўныя URL.
 
-First, run the development server:
+## Запуск
 
-```bash
+Патрэбны Node.js 20.9 або навейшы.
+
+```sh
+npm ci
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Адкрыйце http://localhost:3000 і ўвайдзіце з наяўнымі крэдэнцыяламі AWS. Спіс і палітыкі чытаюцца з таго ж уліковага запісу, дзе выконваюцца дзеянні.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Для зборкі і запуску:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```sh
+npm run build
+npm start
+```
 
-## Learn More
+## Інтэрфейс
 
-To learn more about Next.js, take a look at the following resources:
+- URL у картках займаюць адзін радок са шматкроп’ем. Поўны адрас бачны пры навядзенні, у падрабязнасцях і пры капіяванні.
+- Групы выкарыстоўваюць сапраўдны час **апошняга абнаўлення** CloudFront: апошнія пяць хвілін, сёння, учора і ранейшыя даты ў часавым поясе браўзера. Пры адсутнасці даты паказваецца «Дата абнаўлення невядомая».
+- Сцяжок групы выбірае або здымае выбар толькі гэтай групы. Частковы выбар бачны. Дзеянні з выбранымі люстэркамі знаходзяцца ў плаваючай панэлі і не зрушваюць карткі.
+- Пасля стварэння дзеянне «Выбраць створаныя» выбірае толькі паспяхова створаныя люстэркі, нават калі ў нядаўняй групе ўжо ёсць іншыя.
+- Форма па змаўчанні стварае 10 люстэркаў, прымае ад 1 да 100 і патрабуе абедзве палітыкі. Сапраўдныя ID палітык перадаюцца ў AWS.
+- Паралельна выконваюцца не больш за чатыры запыты стварэння. Частковыя памылкі не хаваюць створаныя рэсурсы і не запускаюць аўтаматычны паўтор усёй групы.
+- Новыя рэсурсы і пацверджаныя змены захоўваюцца ў інтэрфейсе, пакуль агульны спіс AWS іх не пакажа. Станы разгортвання абнаўляюцца аўтаматычна.
+- Падрабязнасці дазваляюць рэдагаваць нататку або тэгі праз кропку з коскай, уключаць і выключаць люстэрка. Выдаленне патрабуе выключанага размеркавання з завершаным абнаўленнем і асобнага пацвярджэння.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Заўвага CloudFront абмежаваная 128 знакамі, таму тое ж абмежаванне дзейнічае ў полі нататак. [AWS DistributionConfig](https://docs.aws.amazon.com/cloudfront/latest/APIReference/API_DistributionConfig.html).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Праверкі URL
 
-## Deploy on Vercel
+Наладзьце наяўны сэрвіс праверкі ў `.env.local`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```dotenv
+NEXT_PUBLIC_AVAILABILITY_CHECKER=https://your-checker.example.org/
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Сэрвіс прымае POST з Content-Type application/x-www-form-urlencoded і полем url, вяртае JSON з булевым ok. Праверкі выконваюцца з браўзера, таму сэрвіс павінен дазваляць гэты origin праз CORS. Палітыкі і стан разгортвання не падмяняюць вынік праверкі URL. Памылка сеткі паказваецца як памылка праверкі, а не як заблакаваны адрас.
+
+«Праверыць усе URL» выкарыстоўвае агульны кэш праверак картак і не больш за чатыры запыты адначасова. Тайм-аўт аднаго запыту — 15 секунд.
+
+## Праверка зменаў
+
+Тэсты запускаюцца на Node.js 24 без дадатковага тэставага фрэймворка:
+
+```sh
+npm test
+npm run lint
+npm run build
+```
+
+Тэсты ахопліваюць памеры і палітыкі групы стварэння, унікальнасць callerReference, абмежаванне паралельнасці, частковыя памылкі без паўтору паспяховых запытаў, групаванне паводле абнаўлення, паўночныя межы і пераход часу, а таксама захаванне выбару іншых груп.
+
+Пры праверцы інтэрфейсу выкарыстоўвайце імітаваныя адказы API ў ізаляваным асяроддзі, каб не ствараць платныя рэсурсы AWS. Для адладкі React Query можна задаць NEXT_PUBLIC_QUERY_DEVTOOLS=true у асяроддзі распрацоўкі.
