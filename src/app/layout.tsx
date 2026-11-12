@@ -18,7 +18,7 @@ export default function RootLayout({
       <body>
         <Providers>
           {children}
-          <Toaster position="top-right" visibleToasts={1} />
+          <Toaster position="top-right" visibleToasts={1} containerAriaLabel="Паведамленні" />
         </Providers>
       </body>
     </html>
